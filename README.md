@@ -1,4 +1,4 @@
-# EduVyapar — Dark Story Mode
+# AIVRM — Dark Story Mode
 ### "Education, Connected."
 
 A cinematic, scroll-driven, spatial education-management experience built from zero.
@@ -9,7 +9,7 @@ A cinematic, scroll-driven, spatial education-management experience built from z
 
 1. **Chapter 00 — Enter**
    - Immersive dark environment with 3D Earth, glowing atmospheric rim, and architectural campus foundations.
-   - Precision floating authentication card with real stateful credentials verification (`admin@eduvyapar.edu`).
+   - Precision floating authentication card with real stateful credentials verification (`admin@aivrm.edu`).
    - "Education, Connected."
 
 2. **Chapter 01 — The Ecosystem**
@@ -51,7 +51,7 @@ A cinematic, scroll-driven, spatial education-management experience built from z
 9. **Chapter 08 — The Future**
    - Minimal cinematic finale scene with infinity gateways, dawn beacon, and horizon perspective lines.
    - *"Education without boundaries. Shaping A Brighter Tomorrow."*
-   - Direct gateway to the live EduVyapar institutional dashboard workspace.
+   - Direct gateway to the live AIVRM institutional dashboard workspace.
 
 ---
 
