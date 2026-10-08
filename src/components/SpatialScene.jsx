@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 
-// Coordinates for major global nodes [lat, lon]
+// Exact geographic coordinates [lat, lon]
 const NODE_COORDINATES = {
   india: { lat: 20.5937, lon: 78.9629, name: 'India (8,470)' },
   uae: { lat: 23.4241, lon: 53.8478, name: 'UAE (1,284)' },
@@ -13,7 +13,7 @@ const NODE_COORDINATES = {
   japan: { lat: 36.2048, lon: 138.2529, name: 'Tokyo (380)' }
 };
 
-function latLonToVector3(lat, lon, radius = 5) {
+function latLonToVector3(lat, lon, radius = 5.0) {
   const phi = (90 - lat) * (Math.PI / 180);
   const theta = (lon + 180) * (Math.PI / 180);
   const x = -(radius * Math.sin(phi) * Math.cos(theta));
@@ -42,100 +42,196 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.1;
+    renderer.toneMappingExposure = 1.15;
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(stateRef.current.theme === 'light' ? 0xf1f4f9 : 0x07090d, 0.025);
+    const isLightInitial = stateRef.current.theme === 'light';
+    scene.fog = new THREE.FogExp2(isLightInitial ? 0xf1f4f9 : 0x07090d, 0.022);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
-    camera.position.set(0, 0, 15);
+    camera.position.set(0, 0, 16);
 
-    // Ambient and Directional Lights
-    const ambientLight = new THREE.AmbientLight(0x0d1424, 1.2);
+    // ==========================================
+    // LIGHTING: Realistic Sun Vector
+    // ==========================================
+    const sunDirection = new THREE.Vector3(12, 6, 14).normalize();
+
+    const ambientLight = new THREE.AmbientLight(0x0e1320, 0.6);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0x685cff, 2.5);
-    keyLight.position.set(10, 15, 10);
-    scene.add(keyLight);
+    const sunLight = new THREE.DirectionalLight(0xffffff, 2.8);
+    sunLight.position.copy(sunDirection.clone().multiplyScalar(50));
+    scene.add(sunLight);
 
-    const rimLight = new THREE.DirectionalLight(0x6ce7ff, 2.0);
-    rimLight.position.set(-15, -10, -10);
-    scene.add(rimLight);
+    // Subtle blue fill light from deep space
+    const fillLight = new THREE.DirectionalLight(0x1a2942, 0.8);
+    fillLight.position.set(-15, -10, -20);
+    scene.add(fillLight);
 
+    // Warm architectural light for campus/horizon
     const warmLight = new THREE.PointLight(0xddbb7a, 1.5, 30);
     warmLight.position.set(0, -4, 8);
     scene.add(warmLight);
 
     // ==========================================
-    // 1. STARFIELD / DUST PARTICLES
+    // 1. DEEP SPACE: Subtle Stars (Not distracting)
     // ==========================================
-    const starCount = 1200;
+    const starCount = 800;
     const starGeo = new THREE.BufferGeometry();
     const starPositions = new Float32Array(starCount * 3);
-    const starScales = new Float32Array(starCount);
 
     for (let i = 0; i < starCount; i++) {
-      starPositions[i * 3] = (Math.random() - 0.5) * 80;
-      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 80;
-      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 80;
-      starScales[i] = Math.random() * 2 + 0.5;
+      starPositions[i * 3] = (Math.random() - 0.5) * 90;
+      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 90;
+      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 90;
     }
 
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
     const starMat = new THREE.PointsMaterial({
-      color: 0x9ba3af,
-      size: 0.15,
+      color: 0x94a3b8,
+      size: 0.12,
       transparent: true,
-      opacity: 0.45,
-      blending: THREE.AdditiveBlending
+      opacity: 0.4
     });
     const starField = new THREE.Points(starGeo, starMat);
     scene.add(starField);
 
     // ==========================================
-    // 2. 3D EARTH GLOBE GROUP
+    // 2. PHOTOREALISTIC 3D PLANET EARTH
     // ==========================================
     const globeGroup = new THREE.Group();
     scene.add(globeGroup);
 
     const globeRadius = 5.0;
+    const textureLoader = new THREE.TextureLoader();
 
-    // Core sphere
-    const globeCoreGeo = new THREE.SphereGeometry(globeRadius, 64, 64);
-    const globeCoreMat = new THREE.MeshStandardMaterial({
-      color: 0x090e18,
-      roughness: 0.7,
-      metalness: 0.2
+    // Load authentic NASA textures
+    const dayMap = textureLoader.load('/textures/planets/earth_day_2048.jpg');
+    const lightsMap = textureLoader.load('/textures/planets/earth_lights_2048.png');
+    const specularMap = textureLoader.load('/textures/planets/earth_specular_2048.jpg');
+    const normalMap = textureLoader.load('/textures/planets/earth_normal_2048.jpg');
+    const cloudsMap = textureLoader.load('/textures/planets/earth_clouds_1024.png');
+
+    dayMap.colorSpace = THREE.SRGBColorSpace;
+    lightsMap.colorSpace = THREE.SRGBColorSpace;
+
+    // Custom Realistic Earth Shader: Day/Night Terminator + Photographed City Lights + Specular Ocean Reflection
+    const earthCustomMat = new THREE.ShaderMaterial({
+      uniforms: {
+        uDayMap: { value: dayMap },
+        uNightMap: { value: lightsMap },
+        uSpecularMap: { value: specularMap },
+        uNormalMap: { value: normalMap },
+        uSunDirection: { value: sunDirection },
+        uAtmosphereColor: { value: new THREE.Color(0x60a5fa) }
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vWorldPosition;
+
+        void main() {
+          vUv = uv;
+          vNormal = normalize(normalMatrix * normal);
+          vec4 worldPos = modelMatrix * vec4(position, 1.0);
+          vWorldPosition = worldPos.xyz;
+          gl_Position = projectionMatrix * viewMatrix * worldPos;
+        }
+      `,
+      fragmentShader: `
+        uniform sampler2D uDayMap;
+        uniform sampler2D uNightMap;
+        uniform sampler2D uSpecularMap;
+        uniform sampler2D uNormalMap;
+        uniform vec3 uSunDirection;
+        uniform vec3 uAtmosphereColor;
+
+        varying vec2 vUv;
+        varying vec3 vNormal;
+        varying vec3 vWorldPosition;
+
+        void main() {
+          vec3 normal = normalize(vNormal);
+          vec3 sunDir = normalize(uSunDirection);
+          vec3 viewDir = normalize(cameraPosition - vWorldPosition);
+
+          // Sunlight incidence
+          float NdotL = dot(normal, sunDir);
+
+          // Soft realistic atmospheric penumbra at terminator
+          float dayFactor = smoothstep(-0.15, 0.25, NdotL);
+          float nightFactor = 1.0 - dayFactor;
+
+          // Day color (landmasses & deep blue oceans)
+          vec4 dayColor = texture2D(uDayMap, vUv);
+
+          // Real photographed night city lights
+          vec4 nightColor = texture2D(uNightMap, vUv);
+          // Realistic golden-amber warmth on city clusters
+          vec3 warmNightLights = nightColor.rgb * vec3(1.3, 1.1, 0.85);
+
+          // Specular reflection on water
+          float specularMask = texture2D(uSpecularMap, vUv).r;
+          vec3 halfVec = normalize(sunDir + viewDir);
+          float specIntensity = pow(max(dot(normal, halfVec), 0.0), 32.0) * specularMask * 1.4;
+          vec3 sunSpec = vec3(1.0, 0.95, 0.85) * specIntensity * dayFactor;
+
+          // Thin Rayleigh atmospheric limb glow (Fresnel)
+          float fresnel = 1.0 - max(dot(normal, viewDir), 0.0);
+          float limbGlow = pow(fresnel, 3.5) * 0.7 * dayFactor;
+
+          // Final composite: physically believable Earth
+          vec3 finalColor = (dayColor.rgb * (dayFactor * 1.1 + 0.04)) + (warmNightLights * nightFactor * 1.6) + sunSpec + (uAtmosphereColor * limbGlow);
+
+          gl_FragColor = vec4(finalColor, 1.0);
+        }
+      `
     });
-    const globeCore = new THREE.Mesh(globeCoreGeo, globeCoreMat);
-    globeGroup.add(globeCore);
 
-    // Globe Lat/Lon Grid lines
-    const gridGeo = new THREE.WireframeGeometry(new THREE.SphereGeometry(globeRadius * 1.002, 32, 24));
-    const gridMat = new THREE.LineBasicMaterial({
-      color: 0x4c8dff,
+    const earthGeo = new THREE.SphereGeometry(globeRadius, 64, 64);
+    const earthMesh = new THREE.Mesh(earthGeo, earthCustomMat);
+    globeGroup.add(earthMesh);
+
+    // ==========================================
+    // 2B. REALISTIC CLOUD LAYER
+    // ==========================================
+    const cloudsGeo = new THREE.SphereGeometry(globeRadius * 1.009, 64, 64);
+    const cloudsMat = new THREE.MeshStandardMaterial({
+      map: cloudsMap,
       transparent: true,
-      opacity: 0.15
+      opacity: 0.65,
+      blending: THREE.AdditiveBlending,
+      roughness: 0.9,
+      metalness: 0.1
     });
-    const globeGrid = new THREE.LineSegments(gridGeo, gridMat);
-    globeGroup.add(globeGrid);
+    const cloudsMesh = new THREE.Mesh(cloudsGeo, cloudsMat);
+    globeGroup.add(cloudsMesh);
 
-    // Glowing Atmospheric Rim
-    const atmosphereGeo = new THREE.SphereGeometry(globeRadius * 1.08, 48, 48);
+    // ==========================================
+    // 2C. SUBTLE THIN ATMOSPHERIC SCATTERING SHELL
+    // ==========================================
+    const atmosphereGeo = new THREE.SphereGeometry(globeRadius * 1.018, 64, 64);
     const atmosphereMat = new THREE.ShaderMaterial({
       vertexShader: `
         varying vec3 vNormal;
+        varying vec3 vPosition;
         void main() {
           vNormal = normalize(normalMatrix * normal);
+          vPosition = (modelViewMatrix * vec4(position, 1.0)).xyz;
           gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
         }
       `,
       fragmentShader: `
         varying vec3 vNormal;
+        varying vec3 vPosition;
         void main() {
-          float intensity = pow(0.72 - dot(vNormal, vec3(0, 0, 1.0)), 2.8);
-          gl_FragColor = vec4(0.35, 0.55, 1.0, 1.0) * intensity * 1.6;
+          vec3 viewDir = normalize(-vPosition);
+          // Very thin, photorealistic blue-white limb
+          float intensity = pow(0.68 - dot(vNormal, viewDir), 2.6);
+          intensity = clamp(intensity, 0.0, 1.0);
+          vec3 atmosColor = mix(vec3(0.38, 0.68, 1.0), vec3(0.85, 0.95, 1.0), intensity);
+          gl_FragColor = vec4(atmosColor, intensity * 0.75);
         }
       `,
       blending: THREE.AdditiveBlending,
@@ -145,77 +241,42 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     const atmosphereMesh = new THREE.Mesh(atmosphereGeo, atmosphereMat);
     globeGroup.add(atmosphereMesh);
 
-    // Continental Point Cloud Matrix on Globe
-    const globeDotsCount = 3600;
-    const dotPositions = new Float32Array(globeDotsCount * 3);
-    const dotColors = new Float32Array(globeDotsCount * 3);
-
-    for (let i = 0; i < globeDotsCount; i++) {
-      const u = Math.random();
-      const v = Math.random();
-      const theta = u * 2.0 * Math.PI;
-      const phi = Math.acos(2.0 * v - 1.0);
-      const r = globeRadius * 1.01;
-
-      const x = r * Math.sin(phi) * Math.cos(theta);
-      const y = r * Math.sin(phi) * Math.sin(theta);
-      const z = r * Math.cos(phi);
-
-      dotPositions[i * 3] = x;
-      dotPositions[i * 3 + 1] = y;
-      dotPositions[i * 3 + 2] = z;
-
-      const isCyan = Math.random() > 0.6;
-      dotColors[i * 3] = isCyan ? 0.35 : 0.41;
-      dotColors[i * 3 + 1] = isCyan ? 0.80 : 0.36;
-      dotColors[i * 3 + 2] = isCyan ? 1.0 : 1.0;
-    }
-
-    const globeDotsGeo = new THREE.BufferGeometry();
-    globeDotsGeo.setAttribute('position', new THREE.BufferAttribute(dotPositions, 3));
-    globeDotsGeo.setAttribute('color', new THREE.BufferAttribute(dotColors, 3));
-
-    const globeDotsMat = new THREE.PointsMaterial({
-      size: 0.055,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.75,
-      blending: THREE.AdditiveBlending
-    });
-    const globeDots = new THREE.Points(globeDotsGeo, globeDotsMat);
-    globeGroup.add(globeDots);
-
-    // Network Hub Pinpoints & Great Circle Arcs
-    const pinGroup = new THREE.Group();
-    globeGroup.add(pinGroup);
+    // ==========================================
+    // 3. AIVRM RESTRAINED DIGITAL NETWORK OVERLAY
+    // (Sitting subtly above the real Earth)
+    // ==========================================
+    const networkOverlayGroup = new THREE.Group();
+    globeGroup.add(networkOverlayGroup);
 
     const pinPoints = {};
     Object.entries(NODE_COORDINATES).forEach(([key, info]) => {
-      const pos = latLonToVector3(info.lat, info.lon, globeRadius * 1.015);
+      const pos = latLonToVector3(info.lat, info.lon, globeRadius * 1.018);
       pinPoints[key] = pos;
 
-      const markerGeo = new THREE.SphereGeometry(0.09, 16, 16);
+      // Small, elegant institutional node pin
+      const markerGeo = new THREE.SphereGeometry(0.07, 16, 16);
       const markerMat = new THREE.MeshBasicMaterial({ color: 0x6ce7ff });
       const markerMesh = new THREE.Mesh(markerGeo, markerMat);
       markerMesh.position.copy(pos);
-      pinGroup.add(markerMesh);
+      networkOverlayGroup.add(markerMesh);
 
-      const ringGeo = new THREE.RingGeometry(0.12, 0.18, 24);
+      // Restrained beacon ring
+      const ringGeo = new THREE.RingGeometry(0.09, 0.14, 24);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: 0x685cff,
+        color: 0x4c8dff,
         side: THREE.DoubleSide,
         transparent: true,
-        opacity: 0.8
+        opacity: 0.75
       });
       const ringMesh = new THREE.Mesh(ringGeo, ringMat);
-      ringMesh.position.copy(pos.clone().multiplyScalar(1.002));
+      ringMesh.position.copy(pos.clone().multiplyScalar(1.001));
       ringMesh.lookAt(pos.clone().multiplyScalar(2));
-      pinGroup.add(ringMesh);
+      networkOverlayGroup.add(ringMesh);
     });
 
-    // Spline Arcs between Hubs
+    // Elegant Great Circle data arcs
     const arcGroup = new THREE.Group();
-    globeGroup.add(arcGroup);
+    networkOverlayGroup.add(arcGroup);
 
     const hubs = ['uae', 'usa', 'uk', 'singapore', 'australia', 'japan', 'canada'];
     const arcCurves = [];
@@ -227,7 +288,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
 
       const mid = start.clone().add(end).multiplyScalar(0.5);
       const dist = start.distanceTo(end);
-      mid.normalize().multiplyScalar(globeRadius + dist * 0.28);
+      mid.normalize().multiplyScalar(globeRadius + dist * 0.22);
 
       const curve = new THREE.QuadraticBezierCurve3(start, mid, end);
       arcCurves.push(curve);
@@ -236,20 +297,20 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       const arcMat = new THREE.LineBasicMaterial({
         color: 0x4c8dff,
         transparent: true,
-        opacity: 0.55
+        opacity: 0.45
       });
       const arcLine = new THREE.Line(arcGeo, arcMat);
       arcGroup.add(arcLine);
     });
 
-    // Flowing particles along arcs
-    const arcParticlesCount = 60;
+    // Restrained pulse particles along arcs
+    const arcParticlesCount = 50;
     const arcParticlesGeo = new THREE.BufferGeometry();
     const arcPartPositions = new Float32Array(arcParticlesCount * 3);
     arcParticlesGeo.setAttribute('position', new THREE.BufferAttribute(arcPartPositions, 3));
     const arcParticlesMat = new THREE.PointsMaterial({
       color: 0xffffff,
-      size: 0.12,
+      size: 0.11,
       blending: THREE.AdditiveBlending,
       transparent: true,
       opacity: 0.95
@@ -258,7 +319,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     arcGroup.add(arcParticlesMesh);
 
     // ==========================================
-    // 3. CHAPTER 02 — APPLICATION FLOW PIPELINE
+    // 4. CHAPTER 02 — APPLICATION FLOW PIPELINE
     // ==========================================
     const flowGroup = new THREE.Group();
     flowGroup.position.set(0, 0, -2);
@@ -284,7 +345,6 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     const flowTube = new THREE.Mesh(flowTubeGeo, flowTubeMat);
     flowGroup.add(flowTube);
 
-    // Spatial flow spheres
     flowNodePoints.forEach((pt, index) => {
       const nodeGeo = new THREE.SphereGeometry(0.42, 24, 24);
       const nodeColors = [0x685cff, 0x4c8dff, 0x6ce7ff, 0xddbb7a, 0x48d597];
@@ -326,7 +386,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     flowGroup.add(pulseMesh);
 
     // ==========================================
-    // 4. CHAPTER 04 — ARCHITECTURAL CAMPUS
+    // 5. CHAPTER 04 — ARCHITECTURAL CAMPUS
     // ==========================================
     const campusGroup = new THREE.Group();
     campusGroup.position.set(0, -3.5, 0);
@@ -402,7 +462,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     });
 
     // ==========================================
-    // 5. CHAPTER 08 — CINEMATIC DAWN HORIZON
+    // 6. CHAPTER 08 — CINEMATIC DAWN HORIZON
     // ==========================================
     const horizonGroup = new THREE.Group();
     horizonGroup.visible = false;
@@ -446,7 +506,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     horizonGroup.add(pillar);
 
     // ==========================================
-    // ANIMATION & STATE ORCHESTRATION LOOP
+    // ANIMATION & REAL-TIME ORCHESTRATION LOOP
     // ==========================================
     let animationFrameId;
     let clock = new THREE.Clock();
@@ -458,52 +518,55 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       const { activeChapter, activeCountry, mousePos, theme } = stateRef.current;
       const isLight = theme === 'light';
 
-      // Dynamically update materials and lighting in real time based on active theme
-      const targetFogColor = activeChapter === '08' 
-        ? new THREE.Color(0x07090d) 
+      // Very slow, calm realistic rotation
+      // Real Earth: slow continuous movement
+      earthMesh.rotation.y = elapsedTime * 0.012;
+      // Clouds move at a slightly different speed for living atmospheric realism
+      cloudsMesh.rotation.y = elapsedTime * 0.014;
+
+      // In Chapter 01, orient toward active country smoothly
+      if (activeChapter === '01') {
+        const targetCoords = NODE_COORDINATES[activeCountry] || NODE_COORDINATES.india;
+        const targetY = -((targetCoords.lon + 90) * Math.PI) / 180;
+        const targetX = ((targetCoords.lat) * Math.PI) / 180;
+        globeGroup.rotation.y += (targetY - globeGroup.rotation.y) * 0.04;
+        globeGroup.rotation.x += (targetX * 0.3 - globeGroup.rotation.x) * 0.04;
+      } else {
+        globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, 0, 0.04);
+      }
+
+      // Dynamic theme adaptation
+      const targetFogColor = activeChapter === '08'
+        ? new THREE.Color(0x07090d)
         : (isLight ? new THREE.Color(0xf1f4f9) : new THREE.Color(0x07090d));
-      
       scene.fog.color.lerp(targetFogColor, 0.05);
 
       const targetAmbColor = isLight ? new THREE.Color(0xffffff) : new THREE.Color(0x0d1424);
       ambientLight.color.lerp(targetAmbColor, 0.05);
-      ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, isLight ? 2.2 : 1.2, 0.05);
+      ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, isLight ? 1.8 : 0.8, 0.05);
 
-      // Globe core & grid color
-      const targetCoreColor = isLight ? new THREE.Color(0xdbe3ee) : new THREE.Color(0x090e18);
-      globeCoreMat.color.lerp(targetCoreColor, 0.05);
-
-      const targetGridColor = isLight ? new THREE.Color(0x2563eb) : new THREE.Color(0x4c8dff);
-      gridMat.color.lerp(targetGridColor, 0.05);
-      gridMat.opacity = isLight ? 0.25 : 0.15;
-
-      // Ground grid in campus
+      // Building prism & grid colors in campus
       const targetGroundColor = isLight ? new THREE.Color(0x5548eb) : new THREE.Color(0x685cff);
       groundGrid.material.color.lerp(targetGroundColor, 0.05);
 
-      // Building prism material
       const targetBuildingColor = isLight ? new THREE.Color(0xe2e8f0) : new THREE.Color(0x0d1424);
       buildingMeshes.forEach((mesh) => {
         mesh.material.color.lerp(targetBuildingColor, 0.05);
       });
 
-      // Star particles color
-      const targetStarColor = isLight ? new THREE.Color(0x64748b) : new THREE.Color(0x9ba3af);
-      starMat.color.lerp(targetStarColor, 0.05);
+      // Parallax mouse nudge (calm, elegant, never feels like a toy)
+      const targetMouseX = (mousePos.x || 0) * 0.4;
+      const targetMouseY = -(mousePos.y || 0) * 0.4;
 
-      // Parallax mouse nudge
-      const targetMouseX = (mousePos.x || 0) * 0.8;
-      const targetMouseY = -(mousePos.y || 0) * 0.8;
+      starField.rotation.y = elapsedTime * 0.008;
 
-      starField.rotation.y = elapsedTime * 0.02;
-
-      // Arc pulse particles along Great Circle arcs
+      // Arc pulse particles along Great Circle data arcs
       const arcPositionsAttr = arcParticlesMesh.geometry.attributes.position;
       if (arcCurves.length > 0) {
         for (let i = 0; i < arcParticlesCount; i++) {
           const curveIdx = i % arcCurves.length;
           const curve = arcCurves[curveIdx];
-          const t = (elapsedTime * 0.22 + i / arcParticlesCount) % 1.0;
+          const t = (elapsedTime * 0.18 + i / arcParticlesCount) % 1.0;
           const pt = curve.getPoint(t);
           arcPositionsAttr.setXYZ(i, pt.x, pt.y, pt.z);
         }
@@ -511,52 +574,45 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       }
 
       // Camera & Group configurations per chapter
-      let targetCamPos = new THREE.Vector3(0, 0, 15);
+      let targetCamPos = new THREE.Vector3(0, 0, 16);
       let targetLook = new THREE.Vector3(0, 0, 0);
       let targetGlobePos = new THREE.Vector3(0, 0, 0);
       let targetGlobeScale = 1.0;
 
       switch (activeChapter) {
-        case '00':
+        case '00': // Enter: Earth distant, massive, calm
           globeGroup.visible = true;
           flowGroup.visible = false;
           campusGroup.visible = true;
           horizonGroup.visible = false;
 
-          targetGlobePos.set(2.8, 1.8, -1);
-          targetGlobeScale = 1.08;
-          targetCamPos.set(targetMouseX * 0.5, 0.4 + targetMouseY * 0.5, 14);
-          targetLook.set(1.5, 0.5, 0);
+          targetGlobePos.set(2.8, 1.6, -1);
+          targetGlobeScale = 1.1;
+          targetCamPos.set(targetMouseX * 0.5, 0.4 + targetMouseY * 0.4, 15);
+          targetLook.set(1.4, 0.4, 0);
 
-          globeGroup.rotation.y = elapsedTime * 0.08;
           campusGroup.position.set(0, -5, -4);
           break;
 
-        case '01':
+        case '01': // Ecosystem: Full Earth, prominent, connecting to selected country
           globeGroup.visible = true;
           flowGroup.visible = false;
           campusGroup.visible = false;
           horizonGroup.visible = false;
 
-          targetGlobePos.set(2.4, 0, 0);
-          targetGlobeScale = 1.15;
-          targetCamPos.set(targetMouseX * 0.6, targetMouseY * 0.6, 13);
-          targetLook.set(1.2, 0, 0);
-
-          const targetCoords = NODE_COORDINATES[activeCountry] || NODE_COORDINATES.india;
-          const targetY = -((targetCoords.lon + 90) * Math.PI) / 180;
-          const targetX = ((targetCoords.lat) * Math.PI) / 180;
-          globeGroup.rotation.y += (targetY - globeGroup.rotation.y) * 0.05;
-          globeGroup.rotation.x += (targetX * 0.4 - globeGroup.rotation.x) * 0.05;
+          targetGlobePos.set(2.2, 0, 0);
+          targetGlobeScale = 1.25;
+          targetCamPos.set(targetMouseX * 0.6, targetMouseY * 0.5, 13.5);
+          targetLook.set(1.0, 0, 0);
           break;
 
-        case '02':
+        case '02': // Flow: Zoom toward geographic flow pipeline
           globeGroup.visible = false;
           flowGroup.visible = true;
           campusGroup.visible = false;
           horizonGroup.visible = false;
 
-          targetCamPos.set(targetMouseX * 1.0, 1.0 + targetMouseY * 0.6, 12);
+          targetCamPos.set(targetMouseX * 0.8, 1.0 + targetMouseY * 0.5, 12);
           targetLook.set(0, 0.5, 0);
 
           const pulseAttr = pulseMesh.geometry.attributes.position;
@@ -569,20 +625,19 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
           flowGroup.rotation.y = Math.sin(elapsedTime * 0.3) * 0.08;
           break;
 
-        case '03':
+        case '03': // People: Atmospheric depth
           globeGroup.visible = true;
           flowGroup.visible = false;
           campusGroup.visible = false;
           horizonGroup.visible = false;
 
           targetGlobePos.set(-4.5, -1.0, -6);
-          targetGlobeScale = 0.9;
+          targetGlobeScale = 0.95;
           targetCamPos.set(targetMouseX * 0.4, targetMouseY * 0.4, 13);
           targetLook.set(-0.5, 0, 0);
-          globeGroup.rotation.y = elapsedTime * 0.05;
           break;
 
-        case '04':
+        case '04': // Institution: Campus layout
           globeGroup.visible = false;
           flowGroup.visible = false;
           campusGroup.visible = true;
@@ -594,48 +649,44 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
           campusGroup.rotation.y = elapsedTime * 0.04;
           break;
 
-        case '05':
+        case '05': // Intelligence: Analytical depth
           globeGroup.visible = true;
           flowGroup.visible = false;
           campusGroup.visible = false;
           horizonGroup.visible = false;
 
           targetGlobePos.set(5.5, -2, -5);
-          targetGlobeScale = 0.85;
+          targetGlobeScale = 0.9;
           targetCamPos.set(targetMouseX * 0.4, targetMouseY * 0.4, 14);
           targetLook.set(0, 0, 0);
-          globeGroup.rotation.y = elapsedTime * 0.06;
           break;
 
-        case '06':
+        case '06': // Application: Focal dossier
           globeGroup.visible = true;
           flowGroup.visible = false;
           campusGroup.visible = false;
           horizonGroup.visible = false;
 
           targetGlobePos.set(4.0, 1.5, -4);
-          targetGlobeScale = 0.8;
+          targetGlobeScale = 0.85;
           targetCamPos.set(targetMouseX * 0.4, targetMouseY * 0.4, 13);
           targetLook.set(0, 0, 0);
-          globeGroup.rotation.y = elapsedTime * 0.04;
           break;
 
-        case '07':
+        case '07': // Network: Epic pullback showing the entire planet Earth with constellation!
           globeGroup.visible = true;
           flowGroup.visible = false;
           campusGroup.visible = true;
           horizonGroup.visible = false;
 
-          targetGlobePos.set(0, 1.2, -4);
-          targetGlobeScale = 1.35;
-          targetCamPos.set(targetMouseX * 0.8, 2.0 + targetMouseY * 0.8, 17);
+          targetGlobePos.set(0, 1.0, -3);
+          targetGlobeScale = 1.45;
+          targetCamPos.set(targetMouseX * 0.8, 2.0 + targetMouseY * 0.8, 18);
           targetLook.set(0, 1.0, 0);
           campusGroup.position.set(0, -5, -6);
-
-          globeGroup.rotation.y = elapsedTime * 0.1;
           break;
 
-        case '08':
+        case '08': // Future: Minimal cinematic dawn
           globeGroup.visible = false;
           flowGroup.visible = false;
           campusGroup.visible = false;
