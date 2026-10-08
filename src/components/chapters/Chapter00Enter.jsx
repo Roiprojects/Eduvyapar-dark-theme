@@ -76,8 +76,8 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
           <h1
             className="font-serif text-gradient-primary"
             style={{
-              fontSize: 'clamp(3.4rem, 6.2vw, 5.8rem)',
-              lineHeight: 1.02,
+              fontSize: 'clamp(2.4rem, 5.5vw, 5.4rem)',
+              lineHeight: 1.04,
               fontWeight: 400,
               letterSpacing: '-0.025em',
               marginBottom: '24px'
@@ -110,9 +110,8 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
         {/* Right Column: Precision Floating Login Object */}
         <div style={{ position: 'relative', zIndex: 10 }}>
           <div
-            className="glass-panel-elevated"
+            className="glass-panel-elevated glass-panel-login"
             style={{
-              padding: '40px 36px',
               boxShadow: 'var(--shadow-spatial)',
               position: 'relative',
               overflow: 'hidden'
@@ -329,7 +328,9 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
                 borderTop: '1px solid var(--border-subtle)',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center'
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '8px'
               }}
             >
               <span style={{ fontSize: '0.78rem', color: 'var(--text-tertiary)' }}>

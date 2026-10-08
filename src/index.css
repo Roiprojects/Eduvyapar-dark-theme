@@ -277,7 +277,8 @@ html, body {
 .chapter-section {
   position: relative;
   min-height: 100vh;
-  width: 100vw;
+  width: 100%;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -286,8 +287,18 @@ html, body {
   box-sizing: border-box;
 }
 
+.glass-panel-login {
+  padding: 40px 36px;
+}
+
 @media (max-width: 900px) {
   .chapter-section {
     padding: 5rem 1.5rem 4rem 1.5rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .glass-panel-login {
+    padding: 28px 20px !important;
   }
 }

@@ -110,8 +110,8 @@ export default function Chapter02Flow({ onNextChapter, onOpenAdmissionModal }) {
                     cursor: 'pointer',
                     borderRadius: '14px',
                     background: isSelected
-                      ? 'rgba(18, 24, 33, 0.95)'
-                      : 'rgba(13, 17, 24, 0.65)',
+                      ? 'var(--bg-surface-elevated)'
+                      : 'var(--bg-glass)',
                     border: isSelected
                       ? '1px solid var(--accent-cyan)'
                       : '1px solid var(--border-subtle)',
@@ -131,15 +131,15 @@ export default function Chapter02Flow({ onNextChapter, onOpenAdmissionModal }) {
                       height: '48px',
                       borderRadius: '50%',
                       background: isSelected
-                        ? 'linear-gradient(135deg, #685cff, #6ce7ff)'
+                        ? 'linear-gradient(135deg, var(--accent-primary), var(--accent-cyan))'
                         : isPassed
                         ? 'rgba(72, 213, 151, 0.15)'
-                        : 'rgba(255, 255, 255, 0.05)',
+                        : 'var(--border-subtle)',
                       border: isSelected
-                        ? '2px solid #ffffff'
+                        ? '2px solid var(--accent-cyan)'
                         : isPassed
                         ? '1px solid var(--accent-success)'
-                        : '1px solid rgba(255, 255, 255, 0.1)',
+                        : '1px solid var(--border-subtle)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -165,7 +165,7 @@ export default function Chapter02Flow({ onNextChapter, onOpenAdmissionModal }) {
                     style={{
                       fontSize: '0.92rem',
                       fontWeight: 600,
-                      color: isSelected ? '#ffffff' : 'var(--text-primary)',
+                      color: 'var(--text-primary)',
                       marginBottom: '8px',
                       lineHeight: 1.3
                     }}
@@ -178,7 +178,7 @@ export default function Chapter02Flow({ onNextChapter, onOpenAdmissionModal }) {
                       fontSize: '0.72rem',
                       padding: '2px 8px',
                       borderRadius: '12px',
-                      background: 'rgba(255, 255, 255, 0.06)',
+                      background: 'var(--border-subtle)',
                       color: 'var(--text-secondary)'
                     }}
                   >

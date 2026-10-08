@@ -132,7 +132,7 @@ export default function Chapter05Intelligence({ onNextChapter }) {
                       y1={y}
                       x2={chartWidth - padding}
                       y2={y}
-                      stroke="rgba(255, 255, 255, 0.06)"
+                      stroke="var(--border-subtle)"
                       strokeDasharray="4 4"
                     />
                   );
@@ -142,7 +142,7 @@ export default function Chapter05Intelligence({ onNextChapter }) {
                 <path d={areaD} fill="url(#areaGrad)" />
 
                 {/* Main spline path */}
-                <path d={pathD} fill="none" stroke="#685CFF" strokeWidth="2.5" />
+                <path d={pathD} fill="none" stroke="var(--accent-primary)" strokeWidth="2.5" />
 
                 {/* Points */}
                 {points.map((pt, i) => (
@@ -151,8 +151,8 @@ export default function Chapter05Intelligence({ onNextChapter }) {
                       cx={pt.x}
                       cy={pt.y}
                       r={hoveredMonth?.month === pt.month ? 6 : 4}
-                      fill="#6CE7FF"
-                      stroke="#07090D"
+                      fill="var(--accent-cyan)"
+                      stroke="var(--bg-surface)"
                       strokeWidth="2"
                       style={{ cursor: 'pointer', transition: 'all 0.2s ease' }}
                     />
@@ -177,8 +177,9 @@ export default function Chapter05Intelligence({ onNextChapter }) {
                     position: 'absolute',
                     top: '10px',
                     right: '10px',
-                    background: 'rgba(18, 24, 33, 0.95)',
+                    background: 'var(--bg-surface-elevated)',
                     border: '1px solid var(--accent-cyan)',
+                    color: 'var(--text-primary)',
                     borderRadius: '6px',
                     padding: '6px 10px',
                     fontSize: '0.75rem',
@@ -257,7 +258,7 @@ export default function Chapter05Intelligence({ onNextChapter }) {
               {/* SVG Donut */}
               <div style={{ position: 'relative', width: '110px', height: '110px' }}>
                 <svg viewBox="0 0 42 42" style={{ transform: 'rotate(-90deg)', width: '100%', height: '100%' }}>
-                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="#121821" strokeWidth="4.5" />
+                  <circle cx="21" cy="21" r="15.915" fill="transparent" stroke="var(--border-subtle)" strokeWidth="4.5" />
                   {/* Engineering 42% */}
                   <circle
                     cx="21"

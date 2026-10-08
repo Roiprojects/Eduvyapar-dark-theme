@@ -113,7 +113,7 @@ export default function Chapter04Institution({ onNextChapter }) {
                   padding: '18px 20px',
                   cursor: 'pointer',
                   border: isSelected ? '1px solid var(--accent-cyan)' : '1px solid var(--border-subtle)',
-                  background: isSelected ? 'rgba(18, 24, 33, 0.95)' : 'rgba(13, 17, 24, 0.65)',
+                  background: isSelected ? 'var(--bg-surface-elevated)' : 'var(--bg-glass)',
                   boxShadow: isSelected ? 'var(--shadow-glow)' : 'none',
                   transition: 'all 0.25s ease'
                 }}

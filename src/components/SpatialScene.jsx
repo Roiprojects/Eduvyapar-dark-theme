@@ -46,21 +46,20 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const isLightInitial = stateRef.current.theme === 'light';
-    scene.fog = new THREE.FogExp2(isLightInitial ? 0xf1f4f9 : 0x07090d, 0.025);
+    scene.fog = new THREE.FogExp2(stateRef.current.theme === 'light' ? 0xf1f4f9 : 0x07090d, 0.025);
 
     const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
     camera.position.set(0, 0, 15);
 
     // Ambient and Directional Lights
-    const ambientLight = new THREE.AmbientLight(isLightInitial ? 0xffffff : 0x0d1424, isLightInitial ? 2.2 : 1.2);
+    const ambientLight = new THREE.AmbientLight(0x0d1424, 1.2);
     scene.add(ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(isLightInitial ? 0x5548eb : 0x685cff, 2.5);
+    const keyLight = new THREE.DirectionalLight(0x685cff, 2.5);
     keyLight.position.set(10, 15, 10);
     scene.add(keyLight);
 
-    const rimLight = new THREE.DirectionalLight(isLightInitial ? 0x0284c7 : 0x6ce7ff, 2.0);
+    const rimLight = new THREE.DirectionalLight(0x6ce7ff, 2.0);
     rimLight.position.set(-15, -10, -10);
     scene.add(rimLight);
 
@@ -85,11 +84,11 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
 
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
     const starMat = new THREE.PointsMaterial({
-      color: isLightInitial ? 0x94a3b8 : 0x9ba3af,
+      color: 0x9ba3af,
       size: 0.15,
       transparent: true,
-      opacity: isLightInitial ? 0.35 : 0.45,
-      blending: isLightInitial ? THREE.NormalBlending : THREE.AdditiveBlending
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending
     });
     const starField = new THREE.Points(starGeo, starMat);
     scene.add(starField);
@@ -105,10 +104,9 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     // Core sphere
     const globeCoreGeo = new THREE.SphereGeometry(globeRadius, 64, 64);
     const globeCoreMat = new THREE.MeshStandardMaterial({
-      color: isLightInitial ? 0xdbe3ee : 0x090e18,
+      color: 0x090e18,
       roughness: 0.7,
-      metalness: 0.2,
-      wireframe: false
+      metalness: 0.2
     });
     const globeCore = new THREE.Mesh(globeCoreGeo, globeCoreMat);
     globeGroup.add(globeCore);
@@ -116,9 +114,9 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     // Globe Lat/Lon Grid lines
     const gridGeo = new THREE.WireframeGeometry(new THREE.SphereGeometry(globeRadius * 1.002, 32, 24));
     const gridMat = new THREE.LineBasicMaterial({
-      color: isLightInitial ? 0x2563eb : 0x4c8dff,
+      color: 0x4c8dff,
       transparent: true,
-      opacity: isLightInitial ? 0.22 : 0.12
+      opacity: 0.15
     });
     const globeGrid = new THREE.LineSegments(gridGeo, gridMat);
     globeGroup.add(globeGrid);
@@ -167,7 +165,6 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       dotPositions[i * 3 + 1] = y;
       dotPositions[i * 3 + 2] = z;
 
-      // Subtle cyan to purple shimmer
       const isCyan = Math.random() > 0.6;
       dotColors[i * 3] = isCyan ? 0.35 : 0.41;
       dotColors[i * 3 + 1] = isCyan ? 0.80 : 0.36;
@@ -183,7 +180,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       vertexColors: true,
       transparent: true,
       opacity: 0.75,
-      blending: isLightInitial ? THREE.NormalBlending : THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending
     });
     const globeDots = new THREE.Points(globeDotsGeo, globeDotsMat);
     globeGroup.add(globeDots);
@@ -197,17 +194,15 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       const pos = latLonToVector3(info.lat, info.lon, globeRadius * 1.015);
       pinPoints[key] = pos;
 
-      // Luminous marker sphere
       const markerGeo = new THREE.SphereGeometry(0.09, 16, 16);
-      const markerMat = new THREE.MeshBasicMaterial({ color: isLightInitial ? 0x0284c7 : 0x6ce7ff });
+      const markerMat = new THREE.MeshBasicMaterial({ color: 0x6ce7ff });
       const markerMesh = new THREE.Mesh(markerGeo, markerMat);
       markerMesh.position.copy(pos);
       pinGroup.add(markerMesh);
 
-      // Pulse beacon ring
       const ringGeo = new THREE.RingGeometry(0.12, 0.18, 24);
       const ringMat = new THREE.MeshBasicMaterial({
-        color: isLightInitial ? 0x5548eb : 0x685cff,
+        color: 0x685cff,
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 0.8
@@ -218,7 +213,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       pinGroup.add(ringMesh);
     });
 
-    // Create Spline Arcs between Hubs (India as primary anchor)
+    // Spline Arcs between Hubs
     const arcGroup = new THREE.Group();
     globeGroup.add(arcGroup);
 
@@ -239,7 +234,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       const points = curve.getPoints(50);
       const arcGeo = new THREE.BufferGeometry().setFromPoints(points);
       const arcMat = new THREE.LineBasicMaterial({
-        color: isLightInitial ? 0x2563eb : 0x6ce7ff,
+        color: 0x4c8dff,
         transparent: true,
         opacity: 0.55
       });
@@ -253,9 +248,9 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     const arcPartPositions = new Float32Array(arcParticlesCount * 3);
     arcParticlesGeo.setAttribute('position', new THREE.BufferAttribute(arcPartPositions, 3));
     const arcParticlesMat = new THREE.PointsMaterial({
-      color: isLightInitial ? 0x5548eb : 0xffffff,
+      color: 0xffffff,
       size: 0.12,
-      blending: isLightInitial ? THREE.NormalBlending : THREE.AdditiveBlending,
+      blending: THREE.AdditiveBlending,
       transparent: true,
       opacity: 0.95
     });
@@ -303,7 +298,6 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       nodeMesh.position.copy(pt);
       flowGroup.add(nodeMesh);
 
-      // Glowing outer ring
       const ringGeo = new THREE.RingGeometry(0.55, 0.65, 32);
       const ringMat = new THREE.MeshBasicMaterial({
         color: nodeColors[index % nodeColors.length],
@@ -317,7 +311,6 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       flowGroup.add(ring);
     });
 
-    // Fast moving pulses along flow tube
     const pulseCount = 35;
     const pulsePositions = new Float32Array(pulseCount * 3);
     const pulseGeo = new THREE.BufferGeometry();
@@ -340,12 +333,10 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     campusGroup.visible = false;
     scene.add(campusGroup);
 
-    // Architectural Ground Grid
-    const groundGrid = new THREE.GridHelper(30, 40, isLightInitial ? 0x5548eb : 0x685cff, isLightInitial ? 0xdbe3ee : 0x121821);
+    const groundGrid = new THREE.GridHelper(30, 40, 0x685cff, 0x121821);
     groundGrid.position.y = 0;
     campusGroup.add(groundGrid);
 
-    // Concentric Campus Courtyards
     for (let r = 2; r <= 10; r += 2.5) {
       const circleGeo = new THREE.RingGeometry(r - 0.04, r + 0.04, 64);
       const circleMat = new THREE.MeshBasicMaterial({
@@ -360,10 +351,10 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       campusGroup.add(circle);
     }
 
-    // Modern architectural glass buildings
     const buildingGroup = new THREE.Group();
     campusGroup.add(buildingGroup);
 
+    const buildingMeshes = [];
     const buildingCoords = [
       { x: 0, z: 0, w: 3.5, d: 3.5, h: 2.2, color: 0x685cff },
       { x: -4.5, z: -2, w: 2.8, d: 2.0, h: 3.8, color: 0x4c8dff },
@@ -377,15 +368,16 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     buildingCoords.forEach((b) => {
       const boxGeo = new THREE.BoxGeometry(b.w, b.h, b.d);
       const boxMat = new THREE.MeshStandardMaterial({
-        color: isLightInitial ? 0xf8fafc : 0x0d1424,
+        color: 0x0d1424,
         roughness: 0.1,
         metalness: 0.8,
         transparent: true,
-        opacity: isLightInitial ? 0.85 : 0.75
+        opacity: 0.75
       });
       const box = new THREE.Mesh(boxGeo, boxMat);
       box.position.set(b.x, b.h / 2, b.z);
       buildingGroup.add(box);
+      buildingMeshes.push(box);
 
       const edgeGeo = new THREE.EdgesGeometry(boxGeo);
       const edgeMat = new THREE.LineBasicMaterial({
@@ -410,7 +402,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     });
 
     // ==========================================
-    // 5. CHAPTER 08 — HORIZON
+    // 5. CHAPTER 08 — CINEMATIC DAWN HORIZON
     // ==========================================
     const horizonGroup = new THREE.Group();
     horizonGroup.visible = false;
@@ -423,7 +415,7 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       const archMat = new THREE.MeshBasicMaterial({
         color: i % 2 === 0 ? 0xddbb7a : 0x685cff,
         transparent: true,
-        opacity: 0.6 - i * 0.08,
+        opacity: 0.7 - i * 0.09,
         blending: THREE.AdditiveBlending
       });
       const arch = new THREE.Mesh(archGeo, archMat);
@@ -432,21 +424,21 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     }
     horizonGroup.add(archShape);
 
-    const dawnLightGeo = new THREE.SphereGeometry(1.2, 32, 32);
+    const dawnLightGeo = new THREE.SphereGeometry(1.4, 32, 32);
     const dawnLightMat = new THREE.MeshBasicMaterial({
       color: 0xffe8bd,
       transparent: true,
-      opacity: 0.85
+      opacity: 0.95
     });
     const dawnLight = new THREE.Mesh(dawnLightGeo, dawnLightMat);
     dawnLight.position.set(0, -1.8, -25);
     horizonGroup.add(dawnLight);
 
-    const pillarGeo = new THREE.CylinderGeometry(0.15, 1.8, 40, 32);
+    const pillarGeo = new THREE.CylinderGeometry(0.2, 2.2, 40, 32);
     const pillarMat = new THREE.MeshBasicMaterial({
       color: 0xddbb7a,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.45,
       blending: THREE.AdditiveBlending
     });
     const pillar = new THREE.Mesh(pillarGeo, pillarMat);
@@ -466,11 +458,38 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
       const { activeChapter, activeCountry, mousePos, theme } = stateRef.current;
       const isLight = theme === 'light';
 
-      // Dynamically blend fog and lighting colors based on theme
-      scene.fog.color.lerp(new THREE.Color(isLight ? 0xf1f4f9 : 0x07090d), 0.05);
-      ambientLight.color.lerp(new THREE.Color(isLight ? 0xffffff : 0x0d1424), 0.05);
+      // Dynamically update materials and lighting in real time based on active theme
+      const targetFogColor = activeChapter === '08' 
+        ? new THREE.Color(0x07090d) 
+        : (isLight ? new THREE.Color(0xf1f4f9) : new THREE.Color(0x07090d));
+      
+      scene.fog.color.lerp(targetFogColor, 0.05);
+
+      const targetAmbColor = isLight ? new THREE.Color(0xffffff) : new THREE.Color(0x0d1424);
+      ambientLight.color.lerp(targetAmbColor, 0.05);
       ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, isLight ? 2.2 : 1.2, 0.05);
-      globeCoreMat.color.lerp(new THREE.Color(isLight ? 0xdbe3ee : 0x090e18), 0.05);
+
+      // Globe core & grid color
+      const targetCoreColor = isLight ? new THREE.Color(0xdbe3ee) : new THREE.Color(0x090e18);
+      globeCoreMat.color.lerp(targetCoreColor, 0.05);
+
+      const targetGridColor = isLight ? new THREE.Color(0x2563eb) : new THREE.Color(0x4c8dff);
+      gridMat.color.lerp(targetGridColor, 0.05);
+      gridMat.opacity = isLight ? 0.25 : 0.15;
+
+      // Ground grid in campus
+      const targetGroundColor = isLight ? new THREE.Color(0x5548eb) : new THREE.Color(0x685cff);
+      groundGrid.material.color.lerp(targetGroundColor, 0.05);
+
+      // Building prism material
+      const targetBuildingColor = isLight ? new THREE.Color(0xe2e8f0) : new THREE.Color(0x0d1424);
+      buildingMeshes.forEach((mesh) => {
+        mesh.material.color.lerp(targetBuildingColor, 0.05);
+      });
+
+      // Star particles color
+      const targetStarColor = isLight ? new THREE.Color(0x64748b) : new THREE.Color(0x9ba3af);
+      starMat.color.lerp(targetStarColor, 0.05);
 
       // Parallax mouse nudge
       const targetMouseX = (mousePos.x || 0) * 0.8;

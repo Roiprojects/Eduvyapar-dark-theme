@@ -259,7 +259,7 @@ export default function Chapter01Ecosystem({ activeCountry, onSelectCountry, onN
                       padding: '10px 12px',
                       borderRadius: '8px',
                       cursor: 'pointer',
-                      background: isSelected ? 'rgba(104, 92, 255, 0.15)' : 'rgba(255, 255, 255, 0.03)',
+                      background: isSelected ? 'rgba(104, 92, 255, 0.15)' : 'var(--border-subtle)',
                       border: isSelected ? '1px solid var(--accent-primary)' : '1px solid transparent',
                       transition: 'all 0.2s ease'
                     }}
@@ -270,7 +270,7 @@ export default function Chapter01Ecosystem({ activeCountry, onSelectCountry, onN
                         style={{
                           fontSize: '0.88rem',
                           fontWeight: isSelected ? 600 : 400,
-                          color: isSelected ? '#ffffff' : 'var(--text-primary)'
+                          color: 'var(--text-primary)'
                         }}
                       >
                         {country.name}
