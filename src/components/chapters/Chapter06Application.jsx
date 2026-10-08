@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { STUDENTS, APPLICATION_TIMELINE } from '../../data/storyData';
-import { Search, CheckCircle2, Clock, XCircle, FileText, ArrowRight, User, Mail, Phone, Calendar, ShieldCheck, Download } from 'lucide-react';
+import { Search, CheckCircle2, Clock, XCircle, FileText, ArrowRight, User, Mail, Phone, Calendar, ShieldCheck, Download, PlusCircle, GraduationCap } from 'lucide-react';
 
-export default function Chapter06Application({ onNextChapter }) {
-  const [selectedStudentId, setSelectedStudentId] = useState('ADM-2026-001');
+export default function Chapter06Application({ onNextChapter, students = STUDENTS, onOpenAdmissionModal }) {
+  const [selectedStudentId, setSelectedStudentId] = useState(students[0]?.id || 'ADM-2026-001');
   const [activeTab, setActiveTab] = useState('Overview');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const currentStudent = STUDENTS.find((s) => s.id === selectedStudentId) || STUDENTS[0];
+  const currentStudent = students.find((s) => s.id === selectedStudentId) || students[0] || STUDENTS[0];
 
-  const filteredStudents = STUDENTS.filter(
+  const filteredStudents = students.filter(
     (s) =>
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.program.toLowerCase().includes(searchQuery.toLowerCase())
@@ -47,9 +47,21 @@ export default function Chapter06Application({ onNextChapter }) {
                 A closer look at what matters.
               </p>
             </div>
-            <button onClick={onNextChapter} className="btn-primary" style={{ padding: '10px 18px' }}>
-              Global Network <ArrowRight size={16} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {onOpenAdmissionModal && (
+                <button
+                  onClick={onOpenAdmissionModal}
+                  className="btn-primary"
+                  style={{ padding: '10px 18px', display: 'flex', alignItems: 'center', gap: '6px' }}
+                >
+                  <GraduationCap size={16} />
+                  <span>Apply for Admission</span>
+                </button>
+              )}
+              <button onClick={onNextChapter} className="btn-secondary" style={{ padding: '10px 18px' }}>
+                Global Network <ArrowRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -65,25 +77,46 @@ export default function Chapter06Application({ onNextChapter }) {
         >
           {/* Left Column: Applications Search & List */}
           <div className="glass-panel" style={{ padding: '18px' }}>
-            <div style={{ position: 'relative', marginBottom: '14px' }}>
-              <Search
-                size={14}
-                style={{
-                  position: 'absolute',
-                  left: '10px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: 'var(--text-tertiary)'
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Search applications..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="precision-input"
-                style={{ padding: '8px 12px 8px 32px', fontSize: '0.82rem' }}
-              />
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px' }}>
+              <div style={{ position: 'relative', flex: 1 }}>
+                <Search
+                  size={14}
+                  style={{
+                    position: 'absolute',
+                    left: '10px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: 'var(--text-tertiary)'
+                  }}
+                />
+                <input
+                  type="text"
+                  placeholder="Search applications..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="precision-input"
+                  style={{ padding: '8px 12px 8px 32px', fontSize: '0.82rem' }}
+                />
+              </div>
+              {onOpenAdmissionModal && (
+                <button
+                  onClick={onOpenAdmissionModal}
+                  style={{
+                    background: 'var(--accent-primary)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: '#fff',
+                    padding: '0 10px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  title="Submit new application"
+                >
+                  <PlusCircle size={16} />
+                </button>
+              )}
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '420px', overflowY: 'auto' }}>
@@ -100,7 +133,7 @@ export default function Chapter06Application({ onNextChapter }) {
                       padding: '10px 12px',
                       borderRadius: '8px',
                       cursor: 'pointer',
-                      background: isSelected ? 'rgba(104, 92, 255, 0.16)' : 'rgba(255, 255, 255, 0.02)',
+                      background: isSelected ? 'rgba(104, 92, 255, 0.16)' : 'rgba(128, 128, 128, 0.04)',
                       border: isSelected ? '1px solid var(--accent-primary)' : '1px solid transparent',
                       transition: 'all 0.2s ease'
                     }}
@@ -171,7 +204,7 @@ export default function Chapter06Application({ onNextChapter }) {
                     height: '64px',
                     borderRadius: '12px',
                     objectFit: 'cover',
-                    border: '2px solid rgba(255, 255, 255, 0.15)'
+                    border: '2px solid rgba(128, 128, 128, 0.2)'
                   }}
                 />
                 <div>
@@ -184,9 +217,15 @@ export default function Chapter06Application({ onNextChapter }) {
                         fontSize: '0.72rem',
                         padding: '2px 8px',
                         borderRadius: '9999px',
-                        background: 'rgba(72, 213, 151, 0.15)',
-                        color: 'var(--accent-success)',
-                        border: '1px solid var(--accent-success)'
+                        background:
+                          currentStudent.status === 'Approved'
+                            ? 'rgba(72, 213, 151, 0.15)'
+                            : 'rgba(241, 184, 75, 0.15)',
+                        color:
+                          currentStudent.status === 'Approved'
+                            ? 'var(--accent-success)'
+                            : 'var(--accent-warning)',
+                        border: '1px solid currentColor'
                       }}
                     >
                       {currentStudent.status}
@@ -199,14 +238,14 @@ export default function Chapter06Application({ onNextChapter }) {
               </div>
 
               {/* Tabs: Overview, Academic, Documents, Payments, Activity */}
-              <div style={{ display: 'flex', gap: '4px', background: 'rgba(255, 255, 255, 0.04)', padding: '3px', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', gap: '4px', background: 'var(--bg-glass)', padding: '3px', borderRadius: '8px' }}>
                 {['Overview', 'Academic', 'Documents', 'Payments', 'Activity'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     style={{
-                      background: activeTab === tab ? 'rgba(255, 255, 255, 0.12)' : 'transparent',
-                      color: activeTab === tab ? '#ffffff' : 'var(--text-secondary)',
+                      background: activeTab === tab ? 'var(--border-subtle)' : 'transparent',
+                      color: activeTab === tab ? 'var(--text-primary)' : 'var(--text-secondary)',
                       border: 'none',
                       borderRadius: '6px',
                       padding: '6px 12px',
@@ -237,7 +276,6 @@ export default function Chapter06Application({ onNextChapter }) {
                 </h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
-                  {/* Vertical connecting line */}
                   <div
                     style={{
                       position: 'absolute',
@@ -280,7 +318,7 @@ export default function Chapter06Application({ onNextChapter }) {
                     marginTop: '24px',
                     padding: '12px 14px',
                     borderRadius: '8px',
-                    background: 'rgba(255, 255, 255, 0.03)',
+                    background: 'var(--bg-glass)',
                     border: '1px solid var(--border-subtle)',
                     display: 'flex',
                     alignItems: 'center',
@@ -333,7 +371,7 @@ export default function Chapter06Application({ onNextChapter }) {
                   </div>
                 </div>
 
-                <div style={{ marginTop: '16px', padding: '12px', borderRadius: '8px', background: 'rgba(255, 255, 255, 0.03)' }}>
+                <div style={{ marginTop: '16px', padding: '12px', borderRadius: '8px', background: 'var(--bg-glass)' }}>
                   <div style={{ fontSize: '0.72rem', textTransform: 'uppercase', color: 'var(--text-tertiary)', marginBottom: '4px' }}>
                     Personal Statement
                   </div>

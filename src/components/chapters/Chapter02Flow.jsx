@@ -10,7 +10,7 @@ const ICON_MAP = {
   CheckCircle2: CheckCircle2
 };
 
-export default function Chapter02Flow({ onNextChapter }) {
+export default function Chapter02Flow({ onNextChapter, onOpenAdmissionModal }) {
   const [activeStepIndex, setActiveStepIndex] = useState(2); // Review in progress by default
 
   const currentStep = FLOW_STEPS[activeStepIndex];
@@ -228,13 +228,22 @@ export default function Chapter02Flow({ onNextChapter }) {
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.76rem', color: 'var(--text-tertiary)' }}>Current Volume</div>
               <div className="font-display" style={{ fontSize: '1.6rem', fontWeight: 700, color: 'var(--accent-cyan)' }}>
                 {currentStep.count.toLocaleString()}
               </div>
             </div>
+            {onOpenAdmissionModal && (
+              <button
+                onClick={onOpenAdmissionModal}
+                className="btn-secondary"
+                style={{ padding: '10px 16px', border: '1px solid var(--border-active)' }}
+              >
+                Apply for Admission
+              </button>
+            )}
             <button onClick={onNextChapter} className="btn-primary" style={{ padding: '10px 18px' }}>
               Meet Students <ArrowRight size={16} />
             </button>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import SpatialScene from './components/SpatialScene';
 import Navigation from './components/Navigation';
 import CommandPalette from './components/CommandPalette';
+import AdmissionModal from './components/AdmissionModal';
 
 import Chapter00Enter from './components/chapters/Chapter00Enter';
 import Chapter01Ecosystem from './components/chapters/Chapter01Ecosystem';
@@ -21,10 +22,12 @@ export default function App() {
   });
   const [activeChapter, setActiveChapter] = useState('00');
   const [activeCountry, setActiveCountry] = useState('india');
+  const [studentsList, setStudentsList] = useState(STUDENTS);
   const [selectedStudent, setSelectedStudent] = useState(STUDENTS[0]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userEmail, setUserEmail] = useState('');
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
+  const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
   const [audioEnabled, setAudioEnabled] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -39,6 +42,15 @@ export default function App() {
 
   const toggleTheme = () => {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
+  // Add new application submission
+  const handleAddApplication = (newApplicant) => {
+    setStudentsList((prev) => [newApplicant, ...prev]);
+    setSelectedStudent(newApplicant);
+    setTimeout(() => {
+      scrollToChapter('06');
+    }, 600);
   };
 
   // Mouse parallax tracking
@@ -161,6 +173,8 @@ export default function App() {
         }
       } else if (e.key.toLowerCase() === 't') {
         toggleTheme();
+      } else if (e.key.toLowerCase() === 'a') {
+        setIsAdmissionModalOpen(true);
       }
     };
 
@@ -178,11 +192,12 @@ export default function App() {
         theme={theme}
       />
 
-      {/* Persistent Navigation (Desktop Left + Top Bar + Mobile Floating) */}
+      {/* Persistent Navigation */}
       <Navigation
         activeChapter={activeChapter}
         onSelectChapter={scrollToChapter}
         onOpenCommandPalette={() => setIsCommandPaletteOpen(true)}
+        onOpenAdmissionModal={() => setIsAdmissionModalOpen(true)}
         audioEnabled={audioEnabled}
         onToggleAudio={toggleAudio}
         isAuthenticated={isAuthenticated}
@@ -199,6 +214,13 @@ export default function App() {
         onSelectStudent={(st) => setSelectedStudent(st)}
         theme={theme}
         onToggleTheme={toggleTheme}
+      />
+
+      {/* Admission Application Form Modal */}
+      <AdmissionModal
+        isOpen={isAdmissionModalOpen}
+        onClose={() => setIsAdmissionModalOpen(false)}
+        onSubmitApplication={handleAddApplication}
       />
 
       {/* 9 Continuous Chapters */}
@@ -225,6 +247,7 @@ export default function App() {
         <div id="chapter-02">
           <Chapter02Flow
             onNextChapter={() => handleNextChapter('02')}
+            onOpenAdmissionModal={() => setIsAdmissionModalOpen(true)}
           />
         </div>
 
@@ -255,6 +278,8 @@ export default function App() {
         <div id="chapter-06">
           <Chapter06Application
             onNextChapter={() => handleNextChapter('06')}
+            students={studentsList}
+            onOpenAdmissionModal={() => setIsAdmissionModalOpen(true)}
           />
         </div>
 

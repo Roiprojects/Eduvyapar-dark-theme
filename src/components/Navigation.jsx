@@ -1,11 +1,12 @@
 import React from 'react';
 import { CHAPTERS } from '../data/storyData';
-import { Search, Volume2, VolumeX, ShieldCheck, Sparkles, Sun, Moon } from 'lucide-react';
+import { Search, Volume2, VolumeX, ShieldCheck, Sparkles, Sun, Moon, GraduationCap } from 'lucide-react';
 
 export default function Navigation({
   activeChapter,
   onSelectChapter,
   onOpenCommandPalette,
+  onOpenAdmissionModal,
   audioEnabled,
   onToggleAudio,
   isAuthenticated,
@@ -119,7 +120,25 @@ export default function Navigation({
 
         {/* Right Action Controls */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Theme Toggle Button (Light/Dark Mode) */}
+          {/* Apply Admission Button */}
+          <button
+            onClick={onOpenAdmissionModal}
+            className="btn-primary"
+            style={{
+              padding: '6px 14px',
+              fontSize: '0.8rem',
+              borderRadius: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              boxShadow: 'var(--shadow-glow)'
+            }}
+          >
+            <GraduationCap size={15} />
+            <span>Apply Now</span>
+          </button>
+
+          {/* Theme Toggle Button */}
           <button
             onClick={onToggleTheme}
             style={{
@@ -256,7 +275,6 @@ export default function Navigation({
                 transition: 'all 0.25s ease'
               }}
             >
-              {/* Indicator Dot / Line */}
               <div
                 style={{
                   width: isActive ? '20px' : '6px',
@@ -267,7 +285,6 @@ export default function Navigation({
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
               />
-              {/* Chapter Label */}
               <span
                 style={{
                   fontSize: '0.74rem',
@@ -306,6 +323,25 @@ export default function Navigation({
           boxShadow: 'var(--shadow-spatial)'
         }}
       >
+        <button
+          onClick={onOpenAdmissionModal}
+          style={{
+            background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))',
+            border: 'none',
+            borderRadius: '9999px',
+            color: '#fff',
+            cursor: 'pointer',
+            padding: '3px 8px',
+            fontSize: '0.7rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px'
+          }}
+        >
+          <GraduationCap size={12} />
+          <span>Apply</span>
+        </button>
         <button
           onClick={onToggleTheme}
           style={{
