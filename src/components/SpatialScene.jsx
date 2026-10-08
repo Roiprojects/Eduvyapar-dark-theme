@@ -319,191 +319,229 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
     arcGroup.add(arcParticlesMesh);
 
     // ==========================================
-    // 4. CHAPTER 02 — APPLICATION FLOW PIPELINE
+    // 4. 3D SPATIAL DATA GRAPH LANDSCAPE
+    // (Financial / Architectural Data Sculpture behind & below Earth)
+    // No wireframes, no nets, no grids, no cyberpunk mesh
     // ==========================================
-    const flowGroup = new THREE.Group();
-    flowGroup.position.set(0, 0, -2);
-    flowGroup.visible = false;
-    scene.add(flowGroup);
+    const dataLandscapeGroup = new THREE.Group();
+    scene.add(dataLandscapeGroup);
 
-    const flowNodePoints = [
-      new THREE.Vector3(-8, 1.2, 0),
-      new THREE.Vector3(-4, -0.6, 1.5),
-      new THREE.Vector3(0, 1.4, -0.5),
-      new THREE.Vector3(4, -0.4, 1.8),
-      new THREE.Vector3(8, 0.8, 0)
+    // --- 4A. 3D Volumetric Architectural Columns (Layered Analytical Bars) ---
+    const columnsGroup = new THREE.Group();
+    dataLandscapeGroup.add(columnsGroup);
+
+    const columnRows = 5;
+    const columnCols = 9;
+    const totalColumns = columnRows * columnCols;
+    const columnMeshes = [];
+    const columnCaps = [];
+    const columnBasePositions = [];
+    const columnBaseHeights = [];
+
+    const columnBoxGeo = new THREE.BoxGeometry(0.72, 1.0, 0.72);
+    // Translate geometry so origin is at the bottom of the box
+    columnBoxGeo.translate(0, 0.5, 0);
+
+    const capBoxGeo = new THREE.BoxGeometry(0.76, 0.08, 0.76);
+    capBoxGeo.translate(0, 0.04, 0);
+
+    const baseElevationY = -4.2;
+
+    for (let r = 0; r < columnRows; r++) {
+      for (let c = 0; c < columnCols; c++) {
+        const x = (c - (columnCols - 1) / 2) * 2.5;
+        const z = -1.5 - r * 2.4;
+        const distFromCenter = Math.sqrt(x * x + (z + 6) * (z + 6));
+        
+        // Base rhythmic height curve
+        const baseH = Math.max(0.6, 2.8 - distFromCenter * 0.15 + Math.sin(c * 0.8) * 0.5);
+
+        // Volumetric column material: Matte graphite / translucent smoked glass
+        const colMat = new THREE.MeshStandardMaterial({
+          color: isLightInitial ? 0xe2e8f0 : 0x0f1522,
+          roughness: 0.22,
+          metalness: 0.55,
+          transparent: true,
+          opacity: 0.72
+        });
+        const colMesh = new THREE.Mesh(columnBoxGeo, colMat);
+        colMesh.position.set(x, baseElevationY, z);
+        colMesh.scale.set(1, baseH, 1);
+        columnsGroup.add(colMesh);
+        columnMeshes.push(colMesh);
+
+        // Architectural Illuminated Cap Plate (soft ivory, muted indigo, cool cyan)
+        const capColors = [0x4c8dff, 0x6ce7ff, 0xddbb7a, 0x7c74db, 0x385a8a];
+        const capColor = capColors[(r * columnCols + c) % capColors.length];
+        const capMat = new THREE.MeshStandardMaterial({
+          color: capColor,
+          emissive: capColor,
+          emissiveIntensity: 0.35,
+          roughness: 0.2,
+          metalness: 0.8
+        });
+        const capMesh = new THREE.Mesh(capBoxGeo, capMat);
+        capMesh.position.set(x, baseElevationY + baseH, z);
+        columnsGroup.add(capMesh);
+        columnCaps.push(capMesh);
+
+        columnBasePositions.push(new THREE.Vector3(x, baseElevationY, z));
+        columnBaseHeights.push(baseH);
+      }
+    }
+
+    // --- 4B. Multi-Depth Flowing 3D Data Ribbons (3 Spatial Z-Layers) ---
+    const ribbonsGroup = new THREE.Group();
+    dataLandscapeGroup.add(ribbonsGroup);
+
+    // Layer 1: Foreground / Mid Data Curve (Z = 0.5) - Student / Applicant Velocity
+    const curvePoints1 = [
+      new THREE.Vector3(-14, -2.5, 1.2),
+      new THREE.Vector3(-9, -0.8, 0.8),
+      new THREE.Vector3(-4, 0.5, 0.2),
+      new THREE.Vector3(1, -1.2, 0.6),
+      new THREE.Vector3(6, 1.2, 0.4),
+      new THREE.Vector3(11, -0.4, 1.0),
+      new THREE.Vector3(15, -2.2, 1.5)
+    ];
+    const curve1 = new THREE.CatmullRomCurve3(curvePoints1);
+    const tubeGeo1 = new THREE.TubeGeometry(curve1, 90, 0.12, 16, false);
+    const tubeMat1 = new THREE.MeshStandardMaterial({
+      color: 0x4c8dff,
+      emissive: 0x244275,
+      emissiveIntensity: 0.45,
+      roughness: 0.25,
+      metalness: 0.6,
+      transparent: true,
+      opacity: 0.85
+    });
+    const ribbon1 = new THREE.Mesh(tubeGeo1, tubeMat1);
+    ribbonsGroup.add(ribbon1);
+
+    // Layer 2: Mid-Depth Curve (Z = -4.5) - Institutional Enrollment & Retention Curve
+    const curvePoints2 = [
+      new THREE.Vector3(-15, -1.8, -4.5),
+      new THREE.Vector3(-10, 0.8, -4.2),
+      new THREE.Vector3(-5, -0.4, -4.8),
+      new THREE.Vector3(0, 1.6, -4.5),
+      new THREE.Vector3(5, -0.2, -4.0),
+      new THREE.Vector3(10, 1.4, -4.6),
+      new THREE.Vector3(15, -1.5, -4.2)
+    ];
+    const curve2 = new THREE.CatmullRomCurve3(curvePoints2);
+    const tubeGeo2 = new THREE.TubeGeometry(curve2, 90, 0.14, 16, false);
+    const tubeMat2 = new THREE.MeshStandardMaterial({
+      color: 0x6ce7ff,
+      emissive: 0x1d596b,
+      emissiveIntensity: 0.35,
+      roughness: 0.3,
+      metalness: 0.5,
+      transparent: true,
+      opacity: 0.75
+    });
+    const ribbon2 = new THREE.Mesh(tubeGeo2, tubeMat2);
+    ribbonsGroup.add(ribbon2);
+
+    // Layer 3: Deep Background Curve (Z = -10.0) - Macroeconomic Global Education Index
+    const curvePoints3 = [
+      new THREE.Vector3(-16, -3.2, -10.0),
+      new THREE.Vector3(-11, -1.2, -9.5),
+      new THREE.Vector3(-6, 1.8, -10.5),
+      new THREE.Vector3(0, 0.2, -9.8),
+      new THREE.Vector3(6, 2.4, -10.2),
+      new THREE.Vector3(12, -0.6, -9.6),
+      new THREE.Vector3(16, -2.8, -10.4)
+    ];
+    const curve3 = new THREE.CatmullRomCurve3(curvePoints3);
+    const tubeGeo3 = new THREE.TubeGeometry(curve3, 90, 0.16, 16, false);
+    const tubeMat3 = new THREE.MeshStandardMaterial({
+      color: 0x7c74db,
+      emissive: 0x2a2559,
+      emissiveIntensity: 0.3,
+      roughness: 0.35,
+      metalness: 0.5,
+      transparent: true,
+      opacity: 0.6
+    });
+    const ribbon3 = new THREE.Mesh(tubeGeo3, tubeMat3);
+    ribbonsGroup.add(ribbon3);
+
+    // Floating Crystalline Data Nodes at key peaks of ribbons
+    const ribbonNodes = [];
+    const ribbonPeakPoints = [
+      curvePoints1[2], curvePoints1[4],
+      curvePoints2[1], curvePoints2[3], curvePoints2[5],
+      curvePoints3[2], curvePoints3[4]
     ];
 
-    const flowCurve = new THREE.CatmullRomCurve3(flowNodePoints);
-    const flowTubeGeo = new THREE.TubeGeometry(flowCurve, 100, 0.08, 12, false);
-    const flowTubeMat = new THREE.MeshBasicMaterial({
-      color: 0x4c8dff,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.35
-    });
-    const flowTube = new THREE.Mesh(flowTubeGeo, flowTubeMat);
-    flowGroup.add(flowTube);
-
-    flowNodePoints.forEach((pt, index) => {
-      const nodeGeo = new THREE.SphereGeometry(0.42, 24, 24);
-      const nodeColors = [0x685cff, 0x4c8dff, 0x6ce7ff, 0xddbb7a, 0x48d597];
+    ribbonPeakPoints.forEach((pt, idx) => {
+      const nodeGeo = new THREE.OctahedronGeometry(0.24, 0);
+      const nodeColor = idx % 2 === 0 ? 0xddbb7a : 0x6ce7ff;
       const nodeMat = new THREE.MeshStandardMaterial({
-        color: nodeColors[index % nodeColors.length],
-        emissive: nodeColors[index % nodeColors.length],
-        emissiveIntensity: 0.6,
-        roughness: 0.2
+        color: nodeColor,
+        emissive: nodeColor,
+        emissiveIntensity: 0.7,
+        roughness: 0.1,
+        metalness: 0.8
       });
       const nodeMesh = new THREE.Mesh(nodeGeo, nodeMat);
       nodeMesh.position.copy(pt);
-      flowGroup.add(nodeMesh);
+      ribbonsGroup.add(nodeMesh);
+      ribbonNodes.push(nodeMesh);
 
-      const ringGeo = new THREE.RingGeometry(0.55, 0.65, 32);
-      const ringMat = new THREE.MeshBasicMaterial({
-        color: nodeColors[index % nodeColors.length],
-        side: THREE.DoubleSide,
+      // Subtle vertical datum plumb-line dropping down towards columns
+      const plumbGeo = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(pt.x, pt.y, pt.z),
+        new THREE.Vector3(pt.x, baseElevationY + 1.2, pt.z)
+      ]);
+      const plumbMat = new THREE.LineBasicMaterial({
+        color: nodeColor,
         transparent: true,
-        opacity: 0.6,
-        blending: THREE.AdditiveBlending
+        opacity: 0.35
       });
-      const ring = new THREE.Mesh(ringGeo, ringMat);
-      ring.position.copy(pt);
-      flowGroup.add(ring);
+      const plumbLine = new THREE.Line(plumbGeo, plumbMat);
+      ribbonsGroup.add(plumbLine);
     });
 
-    const pulseCount = 35;
-    const pulsePositions = new Float32Array(pulseCount * 3);
-    const pulseGeo = new THREE.BufferGeometry();
-    pulseGeo.setAttribute('position', new THREE.BufferAttribute(pulsePositions, 3));
-    const pulseMat = new THREE.PointsMaterial({
-      color: 0x6ce7ff,
-      size: 0.22,
+    // Elegant Gliding Pulse Data Particles on Ribbons
+    const ribbonPulseCount = 40;
+    const ribbonPulseGeo = new THREE.BufferGeometry();
+    const ribbonPulsePos = new Float32Array(ribbonPulseCount * 3);
+    ribbonPulseGeo.setAttribute('position', new THREE.BufferAttribute(ribbonPulsePos, 3));
+    const ribbonPulseMat = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.18,
       blending: THREE.AdditiveBlending,
       transparent: true,
       opacity: 0.95
     });
-    const pulseMesh = new THREE.Points(pulseGeo, pulseMat);
-    flowGroup.add(pulseMesh);
+    const ribbonPulseMesh = new THREE.Points(ribbonPulseGeo, ribbonPulseMat);
+    ribbonsGroup.add(ribbonPulseMesh);
 
-    // ==========================================
-    // 5. CHAPTER 04 — ARCHITECTURAL CAMPUS
-    // ==========================================
-    const campusGroup = new THREE.Group();
-    campusGroup.position.set(0, -3.5, 0);
-    campusGroup.visible = false;
-    scene.add(campusGroup);
-
-    const groundGrid = new THREE.GridHelper(30, 40, 0x685cff, 0x121821);
-    groundGrid.position.y = 0;
-    campusGroup.add(groundGrid);
-
-    for (let r = 2; r <= 10; r += 2.5) {
-      const circleGeo = new THREE.RingGeometry(r - 0.04, r + 0.04, 64);
-      const circleMat = new THREE.MeshBasicMaterial({
-        color: 0x4c8dff,
-        side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.15
-      });
-      const circle = new THREE.Mesh(circleGeo, circleMat);
-      circle.rotation.x = Math.PI / 2;
-      circle.position.y = 0.02;
-      campusGroup.add(circle);
+    // --- 4C. Translucent Contour Data Horizon (Smooth gradient, no wireframe) ---
+    const contourPlaneGeo = new THREE.PlaneGeometry(38, 26, 32, 32);
+    contourPlaneGeo.rotateX(-Math.PI / 2);
+    
+    // Displace vertices gently with harmonic analytical elevation
+    const planePosAttr = contourPlaneGeo.attributes.position;
+    for (let i = 0; i < planePosAttr.count; i++) {
+      const vx = planePosAttr.getX(i);
+      const vz = planePosAttr.getZ(i);
+      const elevation = Math.sin(vx * 0.28) * Math.cos(vz * 0.32) * 0.45;
+      planePosAttr.setY(i, elevation);
     }
+    contourPlaneGeo.computeVertexNormals();
 
-    const buildingGroup = new THREE.Group();
-    campusGroup.add(buildingGroup);
-
-    const buildingMeshes = [];
-    const buildingCoords = [
-      { x: 0, z: 0, w: 3.5, d: 3.5, h: 2.2, color: 0x685cff },
-      { x: -4.5, z: -2, w: 2.8, d: 2.0, h: 3.8, color: 0x4c8dff },
-      { x: 4.8, z: -1.5, w: 2.5, d: 2.5, h: 3.2, color: 0x6ce7ff },
-      { x: -3.8, z: 3.5, w: 2.4, d: 2.8, h: 1.8, color: 0xddbb7a },
-      { x: 4.2, z: 3.8, w: 3.0, d: 2.0, h: 2.6, color: 0x48d597 },
-      { x: -7.5, z: 1.0, w: 2.0, d: 2.0, h: 1.5, color: 0x685cff },
-      { x: 7.2, z: 0.5, w: 2.0, d: 2.0, h: 2.0, color: 0x4c8dff }
-    ];
-
-    buildingCoords.forEach((b) => {
-      const boxGeo = new THREE.BoxGeometry(b.w, b.h, b.d);
-      const boxMat = new THREE.MeshStandardMaterial({
-        color: 0x0d1424,
-        roughness: 0.1,
-        metalness: 0.8,
-        transparent: true,
-        opacity: 0.75
-      });
-      const box = new THREE.Mesh(boxGeo, boxMat);
-      box.position.set(b.x, b.h / 2, b.z);
-      buildingGroup.add(box);
-      buildingMeshes.push(box);
-
-      const edgeGeo = new THREE.EdgesGeometry(boxGeo);
-      const edgeMat = new THREE.LineBasicMaterial({
-        color: b.color,
-        transparent: true,
-        opacity: 0.75
-      });
-      const edges = new THREE.LineSegments(edgeGeo, edgeMat);
-      edges.position.copy(box.position);
-      buildingGroup.add(edges);
-
-      const beamGeo = new THREE.CylinderGeometry(0.04, 0.25, 4.0, 16);
-      const beamMat = new THREE.MeshBasicMaterial({
-        color: b.color,
-        transparent: true,
-        opacity: 0.35,
-        blending: THREE.AdditiveBlending
-      });
-      const beam = new THREE.Mesh(beamGeo, beamMat);
-      beam.position.set(b.x, b.h + 2.0, b.z);
-      buildingGroup.add(beam);
-    });
-
-    // ==========================================
-    // 6. CHAPTER 08 — CINEMATIC DAWN HORIZON
-    // ==========================================
-    const horizonGroup = new THREE.Group();
-    horizonGroup.visible = false;
-    scene.add(horizonGroup);
-
-    const archShape = new THREE.Group();
-    for (let i = 0; i < 6; i++) {
-      const scale = 1 + i * 0.4;
-      const archGeo = new THREE.TorusGeometry(3.5 * scale, 0.05, 16, 80, Math.PI);
-      const archMat = new THREE.MeshBasicMaterial({
-        color: i % 2 === 0 ? 0xddbb7a : 0x685cff,
-        transparent: true,
-        opacity: 0.7 - i * 0.09,
-        blending: THREE.AdditiveBlending
-      });
-      const arch = new THREE.Mesh(archGeo, archMat);
-      arch.position.set(0, -2, -5 - i * 3);
-      archShape.add(arch);
-    }
-    horizonGroup.add(archShape);
-
-    const dawnLightGeo = new THREE.SphereGeometry(1.4, 32, 32);
-    const dawnLightMat = new THREE.MeshBasicMaterial({
-      color: 0xffe8bd,
+    const contourPlaneMat = new THREE.MeshStandardMaterial({
+      color: isLightInitial ? 0xedf2f7 : 0x090d15,
+      roughness: 0.4,
+      metalness: 0.3,
       transparent: true,
-      opacity: 0.95
+      opacity: 0.6
     });
-    const dawnLight = new THREE.Mesh(dawnLightGeo, dawnLightMat);
-    dawnLight.position.set(0, -1.8, -25);
-    horizonGroup.add(dawnLight);
-
-    const pillarGeo = new THREE.CylinderGeometry(0.2, 2.2, 40, 32);
-    const pillarMat = new THREE.MeshBasicMaterial({
-      color: 0xddbb7a,
-      transparent: true,
-      opacity: 0.45,
-      blending: THREE.AdditiveBlending
-    });
-    const pillar = new THREE.Mesh(pillarGeo, pillarMat);
-    pillar.position.set(0, 10, -25);
-    horizonGroup.add(pillar);
+    const contourPlane = new THREE.Mesh(contourPlaneGeo, contourPlaneMat);
+    contourPlane.position.set(0, baseElevationY - 0.1, -6);
+    dataLandscapeGroup.add(contourPlane);
 
     // ==========================================
     // ANIMATION & REAL-TIME ORCHESTRATION LOOP
@@ -535,30 +573,23 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
         globeGroup.rotation.x = THREE.MathUtils.lerp(globeGroup.rotation.x, 0, 0.04);
       }
 
+
       // Dynamic theme adaptation
       const targetFogColor = activeChapter === '08'
-        ? new THREE.Color(0x07090d)
+        ? (isLight ? new THREE.Color(0xe5e7eb) : new THREE.Color(0x07090d))
         : (isLight ? new THREE.Color(0xf1f4f9) : new THREE.Color(0x07090d));
       scene.fog.color.lerp(targetFogColor, 0.05);
 
-      const targetAmbColor = isLight ? new THREE.Color(0xffffff) : new THREE.Color(0x0d1424);
+      const targetAmbColor = isLight ? new THREE.Color(0xffffff) : new THREE.Color(0x0e1320);
       ambientLight.color.lerp(targetAmbColor, 0.05);
       ambientLight.intensity = THREE.MathUtils.lerp(ambientLight.intensity, isLight ? 1.8 : 0.8, 0.05);
 
-      // Building prism & grid colors in campus
-      const targetGroundColor = isLight ? new THREE.Color(0x5548eb) : new THREE.Color(0x685cff);
-      groundGrid.material.color.lerp(targetGroundColor, 0.05);
-
-      const targetBuildingColor = isLight ? new THREE.Color(0xe2e8f0) : new THREE.Color(0x0d1424);
-      buildingMeshes.forEach((mesh) => {
-        mesh.material.color.lerp(targetBuildingColor, 0.05);
-      });
-
-      // Parallax mouse nudge (calm, elegant, never feels like a toy)
+      // Parallax mouse nudge (calm, elegant, architectural depth)
       const targetMouseX = (mousePos.x || 0) * 0.4;
       const targetMouseY = -(mousePos.y || 0) * 0.4;
 
-      starField.rotation.y = elapsedTime * 0.008;
+      starField.rotation.y = elapsedTime * 0.006;
+      dataLandscapeGroup.rotation.y = targetMouseX * 0.02;
 
       // Arc pulse particles along Great Circle data arcs
       const arcPositionsAttr = arcParticlesMesh.geometry.attributes.position;
@@ -573,129 +604,180 @@ export default function SpatialScene({ activeChapter = '00', activeCountry = 'in
         arcPositionsAttr.needsUpdate = true;
       }
 
-      // Camera & Group configurations per chapter
+      // Dynamic Gliding Pulse Data along 3D Ribbons
+      const ribbonPulseAttr = ribbonPulseMesh.geometry.attributes.position;
+      for (let i = 0; i < ribbonPulseCount; i++) {
+        let activeRibbonCurve = curve1;
+        if (i % 3 === 1) activeRibbonCurve = curve2;
+        if (i % 3 === 2) activeRibbonCurve = curve3;
+        const speed = activeChapter === '02' ? 0.38 : 0.16;
+        const t = (elapsedTime * speed + i / ribbonPulseCount) % 1.0;
+        const pt = activeRibbonCurve.getPoint(t);
+        ribbonPulseAttr.setXYZ(i, pt.x, pt.y, pt.z);
+      }
+      ribbonPulseAttr.needsUpdate = true;
+
+      // Subtle dynamic float on ribbon crystalline nodes
+      ribbonNodes.forEach((node, idx) => {
+        node.rotation.y = elapsedTime * 0.6 + idx;
+        node.rotation.x = Math.sin(elapsedTime * 0.4 + idx) * 0.3;
+      });
+
+      // --- STORY-DRIVEN 3D DATA COLUMNS MORPHING ---
+      const targetColColor = isLight ? new THREE.Color(0xe2e8f0) : new THREE.Color(0x0f1522);
+      const targetContourColor = isLight ? new THREE.Color(0xedf2f7) : new THREE.Color(0x090d15);
+      contourPlane.material.color.lerp(targetContourColor, 0.05);
+
+      for (let i = 0; i < totalColumns; i++) {
+        const colMesh = columnMeshes[i];
+        const capMesh = columnCaps[i];
+        const r = Math.floor(i / columnCols);
+        const c = i % columnCols;
+        const baseH = columnBaseHeights[i];
+
+        let targetH = baseH;
+
+        switch (activeChapter) {
+          case '00': // Enter: Calm architectural resting field
+            targetH = baseH * 0.8 + Math.sin(elapsedTime * 0.8 + c * 0.4) * 0.2;
+            break;
+
+          case '01': // Ecosystem: Calm, Earth dominant, subtle ambient breath
+            targetH = baseH * 0.85 + Math.sin(elapsedTime * 0.6 + r * 0.5) * 0.25;
+            break;
+
+          case '02': // Flow: Dynamic traveling wave streams across columns
+            targetH = Math.max(0.5, Math.sin(c * 0.7 - elapsedTime * 2.5) * 1.8 + 2.2);
+            break;
+
+          case '03': // People: Regional student cohort metric towers rise
+            if (c >= 2 && c <= 6) {
+              targetH = 3.8 + Math.sin(r * 1.2) * 1.5;
+            } else {
+              targetH = 1.0;
+            }
+            break;
+
+          case '04': // Institution: Architectural campus department blocks
+            // Engineering (c=1,2), Business (c=3,4), Medicine (c=5,6), Design (c=7)
+            if (c === 1 || c === 2) targetH = 4.8 + (r % 2) * 1.0;
+            else if (c === 3 || c === 4) targetH = 4.2 + (r % 2) * 0.8;
+            else if (c === 5 || c === 6) targetH = 5.6 + (r % 2) * 0.9;
+            else if (c === 7) targetH = 3.6 + (r % 2) * 0.6;
+            else targetH = 1.2;
+            break;
+
+          case '05': // Intelligence: High-dimensional analytical landscape
+            targetH = Math.max(0.6, 2.8 + Math.sin(c * 0.8 + elapsedTime * 0.4) * 1.8 + Math.cos(r * 0.9) * 1.2);
+            break;
+
+          case '06': // Application: Focal student dossier - background fades, focus remains
+            if (c === 5 && r === 2) {
+              targetH = 5.2; // Focal student application column
+            } else {
+              targetH = 0.4; // Calm, non-competing backdrop
+            }
+            break;
+
+          case '07': // Network: Global grand harmonic elevation as camera pulls back
+            targetH = baseH * 1.35 + Math.sin(c * 0.5) * 0.6;
+            break;
+
+          case '08': // Future: Serene horizon, graph gently recedes into dawn
+            targetH = 0.35 + Math.sin(elapsedTime * 0.5 + c * 0.2) * 0.08;
+            break;
+
+          default:
+            targetH = baseH;
+            break;
+        }
+
+        // Smooth height interpolation
+        const curScaleY = colMesh.scale.y;
+        const newScaleY = THREE.MathUtils.lerp(curScaleY, targetH, 0.05);
+        colMesh.scale.y = newScaleY;
+        capMesh.position.y = baseElevationY + newScaleY;
+
+        colMesh.material.color.lerp(targetColColor, 0.05);
+      }
+
+      // Camera & Spatial Choreography per chapter
       let targetCamPos = new THREE.Vector3(0, 0, 16);
       let targetLook = new THREE.Vector3(0, 0, 0);
       let targetGlobePos = new THREE.Vector3(0, 0, 0);
       let targetGlobeScale = 1.0;
 
       switch (activeChapter) {
-        case '00': // Enter: Earth distant, massive, calm
-          globeGroup.visible = true;
-          flowGroup.visible = false;
-          campusGroup.visible = true;
-          horizonGroup.visible = false;
-
-          targetGlobePos.set(2.8, 1.6, -1);
+        case '00': // Enter: Earth distant, massive, calm with spatial data landscape below
+          targetGlobePos.set(2.6, 1.4, -1);
           targetGlobeScale = 1.1;
-          targetCamPos.set(targetMouseX * 0.5, 0.4 + targetMouseY * 0.4, 15);
-          targetLook.set(1.4, 0.4, 0);
-
-          campusGroup.position.set(0, -5, -4);
+          targetCamPos.set(targetMouseX * 0.5, 0.5 + targetMouseY * 0.4, 15);
+          targetLook.set(1.2, 0.3, 0);
+          dataLandscapeGroup.position.set(0, -0.6, 0);
           break;
 
-        case '01': // Ecosystem: Full Earth, prominent, connecting to selected country
-          globeGroup.visible = true;
-          flowGroup.visible = false;
-          campusGroup.visible = false;
-          horizonGroup.visible = false;
-
-          targetGlobePos.set(2.2, 0, 0);
+        case '01': // Ecosystem: Full Earth dominant, connecting to selected country
+          targetGlobePos.set(2.4, 0.2, 0);
           targetGlobeScale = 1.25;
           targetCamPos.set(targetMouseX * 0.6, targetMouseY * 0.5, 13.5);
           targetLook.set(1.0, 0, 0);
+          dataLandscapeGroup.position.set(0, -1.2, 0);
           break;
 
-        case '02': // Flow: Zoom toward geographic flow pipeline
-          globeGroup.visible = false;
-          flowGroup.visible = true;
-          campusGroup.visible = false;
-          horizonGroup.visible = false;
-
-          targetCamPos.set(targetMouseX * 0.8, 1.0 + targetMouseY * 0.5, 12);
-          targetLook.set(0, 0.5, 0);
-
-          const pulseAttr = pulseMesh.geometry.attributes.position;
-          for (let i = 0; i < pulseCount; i++) {
-            const t = (elapsedTime * 0.35 + i / pulseCount) % 1.0;
-            const pt = flowCurve.getPoint(t);
-            pulseAttr.setXYZ(i, pt.x, pt.y, pt.z);
-          }
-          pulseAttr.needsUpdate = true;
-          flowGroup.rotation.y = Math.sin(elapsedTime * 0.3) * 0.08;
-          break;
-
-        case '03': // People: Atmospheric depth
-          globeGroup.visible = true;
-          flowGroup.visible = false;
-          campusGroup.visible = false;
-          horizonGroup.visible = false;
-
-          targetGlobePos.set(-4.5, -1.0, -6);
-          targetGlobeScale = 0.95;
-          targetCamPos.set(targetMouseX * 0.4, targetMouseY * 0.4, 13);
-          targetLook.set(-0.5, 0, 0);
-          break;
-
-        case '04': // Institution: Campus layout
-          globeGroup.visible = false;
-          flowGroup.visible = false;
-          campusGroup.visible = true;
-          horizonGroup.visible = false;
-
-          campusGroup.position.set(0, -3.2, 0);
-          targetCamPos.set(0 + targetMouseX * 1.5, 7.5 + targetMouseY * 0.8, 14);
-          targetLook.set(0, 0.5, 0);
-          campusGroup.rotation.y = elapsedTime * 0.04;
-          break;
-
-        case '05': // Intelligence: Analytical depth
-          globeGroup.visible = true;
-          flowGroup.visible = false;
-          campusGroup.visible = false;
-          horizonGroup.visible = false;
-
-          targetGlobePos.set(5.5, -2, -5);
+        case '02': // Flow: Camera descends slightly to showcase 3D data ribbons and stream columns
+          targetGlobePos.set(4.5, 1.8, -4);
           targetGlobeScale = 0.9;
-          targetCamPos.set(targetMouseX * 0.4, targetMouseY * 0.4, 14);
-          targetLook.set(0, 0, 0);
+          targetCamPos.set(targetMouseX * 0.7, 0.8 + targetMouseY * 0.5, 12);
+          targetLook.set(0.5, -0.2, 0);
+          dataLandscapeGroup.position.set(0, 0, 0);
           break;
 
-        case '06': // Application: Focal dossier
-          globeGroup.visible = true;
-          flowGroup.visible = false;
-          campusGroup.visible = false;
-          horizonGroup.visible = false;
+        case '03': // People: Atmospheric student cohorts with ivory data towers
+          targetGlobePos.set(-4.5, -0.8, -6);
+          targetGlobeScale = 0.95;
+          targetCamPos.set(targetMouseX * 0.4, 0.2 + targetMouseY * 0.4, 13);
+          targetLook.set(-0.5, -0.2, 0);
+          dataLandscapeGroup.position.set(0, 0.2, 0);
+          break;
 
-          targetGlobePos.set(4.0, 1.5, -4);
+        case '04': // Institution: Architectural campus department columns become focal
+          targetGlobePos.set(0, 4.8, -12);
+          targetGlobeScale = 0.75;
+          targetCamPos.set(0 + targetMouseX * 1.2, 4.2 + targetMouseY * 0.7, 13);
+          targetLook.set(0, -1.2, -4);
+          dataLandscapeGroup.position.set(0, 0.6, 0);
+          break;
+
+        case '05': // Intelligence: Grand spatial intelligence landscape with 3 ribbon depths
+          targetGlobePos.set(5.2, -1.6, -5);
+          targetGlobeScale = 0.92;
+          targetCamPos.set(targetMouseX * 0.5, 1.0 + targetMouseY * 0.4, 14);
+          targetLook.set(0, 0, -2);
+          dataLandscapeGroup.position.set(0, 0.4, 0);
+          break;
+
+        case '06': // Application: Focal dossier, surrounding data dims
+          targetGlobePos.set(4.0, 1.6, -4);
           targetGlobeScale = 0.85;
-          targetCamPos.set(targetMouseX * 0.4, targetMouseY * 0.4, 13);
-          targetLook.set(0, 0, 0);
+          targetCamPos.set(targetMouseX * 0.4, 0.4 + targetMouseY * 0.4, 13);
+          targetLook.set(0.5, 0, 0);
+          dataLandscapeGroup.position.set(0, 0, 0);
           break;
 
-        case '07': // Network: Epic pullback showing the entire planet Earth with constellation!
-          globeGroup.visible = true;
-          flowGroup.visible = false;
-          campusGroup.visible = true;
-          horizonGroup.visible = false;
-
-          targetGlobePos.set(0, 1.0, -3);
-          targetGlobeScale = 1.45;
+        case '07': // Network: Camera pulls back to reveal entire Earth + Global Data Landscape
+          targetGlobePos.set(0, 1.2, -3);
+          targetGlobeScale = 1.4;
           targetCamPos.set(targetMouseX * 0.8, 2.0 + targetMouseY * 0.8, 18);
-          targetLook.set(0, 1.0, 0);
-          campusGroup.position.set(0, -5, -6);
+          targetLook.set(0, 0.8, 0);
+          dataLandscapeGroup.position.set(0, -1.8, 0);
           break;
 
-        case '08': // Future: Minimal cinematic dawn
-          globeGroup.visible = false;
-          flowGroup.visible = false;
-          campusGroup.visible = false;
-          horizonGroup.visible = true;
-
-          targetCamPos.set(targetMouseX * 0.5, -0.5 + targetMouseY * 0.4, 11);
-          targetLook.set(0, 0.5, -15);
-          archShape.rotation.z = Math.sin(elapsedTime * 0.2) * 0.03;
-          dawnLight.scale.setScalar(1 + Math.sin(elapsedTime * 1.5) * 0.06);
+        case '08': // Future: Serene orbital dawn, graph recedes softly
+          targetGlobePos.set(0, 0.8, -10);
+          targetGlobeScale = 0.8;
+          targetCamPos.set(targetMouseX * 0.5, 0.2 + targetMouseY * 0.4, 12);
+          targetLook.set(0, 0.4, -8);
+          dataLandscapeGroup.position.set(0, -3.2, 0);
           break;
 
         default:
