@@ -289,7 +289,7 @@ export default function Chapter03People({ selectedStudent, onSelectStudent, onNe
             </blockquote>
 
             <p style={{ color: 'var(--text-secondary)', fontSize: '1rem', lineHeight: 1.6, maxWidth: '420px', marginBottom: '32px' }}>
-              Every student interaction at EduVyapar—from application submission, credit accreditation to fee settlement—is tied to real individual aspirations.
+              Every student interaction at AIVRM—from application submission, credit accreditation to fee settlement—is tied to real individual aspirations.
             </p>
 
             <button

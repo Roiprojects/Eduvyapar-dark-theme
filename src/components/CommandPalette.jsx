@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, X, ArrowRight, User, Globe, Compass, BarChart2, School, Shield } from 'lucide-react';
+import { Search, X, ArrowRight, User, Globe, Compass, BarChart2, School, Shield, Sun, Moon } from 'lucide-react';
 import { CHAPTERS, STUDENTS } from '../data/storyData';
 
-export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSelectStudent }) {
+export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSelectStudent, theme = 'dark', onToggleTheme }) {
   const [query, setQuery] = useState('');
   const inputRef = useRef(null);
 
@@ -19,7 +19,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         if (isOpen) onClose();
-        else onClose(false); // toggle
+        else onClose(false);
       }
       if (e.key === 'Escape' && isOpen) {
         onClose();
@@ -48,7 +48,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
         position: 'fixed',
         inset: 0,
         zIndex: 100,
-        backgroundColor: 'rgba(7, 9, 13, 0.75)',
+        backgroundColor: theme === 'dark' ? 'rgba(7, 9, 13, 0.75)' : 'rgba(15, 23, 42, 0.45)',
         backdropFilter: 'blur(12px)',
         display: 'flex',
         alignItems: 'flex-start',
@@ -81,7 +81,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
           <input
             ref={inputRef}
             type="text"
-            placeholder="Search chapters, students, analytics, institutions..."
+            placeholder="Search AIVRM chapters, students, theme..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             style={{
@@ -109,6 +109,48 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
 
         {/* Results List */}
         <div style={{ maxHeight: '380px', overflowY: 'auto', padding: '12px' }}>
+          {/* Quick Theme Switch Option */}
+          <div
+            onClick={() => {
+              onToggleTheme();
+              onClose();
+            }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '10px 12px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              marginBottom: '12px',
+              background: 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {theme === 'dark' ? <Sun size={18} color="var(--accent-warm)" /> : <Moon size={18} color="var(--accent-primary)" />}
+              <div>
+                <div style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                  Toggle Theme: Switch to {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </div>
+                <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)' }}>
+                  {theme === 'dark' ? 'Experience AIVRM in luminous ivory & cobalt' : 'Experience AIVRM in deep celestial space'}
+                </div>
+              </div>
+            </div>
+            <span
+              style={{
+                fontSize: '0.72rem',
+                padding: '2px 8px',
+                borderRadius: '6px',
+                background: 'var(--border-subtle)',
+                color: 'var(--text-primary)'
+              }}
+            >
+              Enter
+            </span>
+          </div>
+
           {/* Chapters Section */}
           <div style={{ marginBottom: '16px' }}>
             <div
@@ -140,7 +182,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
                   transition: 'background 0.2s ease',
                   color: 'var(--text-primary)'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-subtle)')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -151,7 +193,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
                       color: 'var(--accent-cyan)',
                       padding: '2px 6px',
                       borderRadius: '4px',
-                      background: 'rgba(108, 231, 255, 0.1)'
+                      background: 'rgba(108, 231, 255, 0.12)'
                     }}
                   >
                     {chap.id}
@@ -198,7 +240,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
                   color: 'var(--text-primary)',
                   transition: 'background 0.2s ease'
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.06)')}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--border-subtle)')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -218,7 +260,7 @@ export default function CommandPalette({ isOpen, onClose, onSelectChapter, onSel
                     color: st.status === 'Approved' ? 'var(--accent-success)' : 'var(--accent-warning)',
                     padding: '2px 8px',
                     borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.05)'
+                    background: 'var(--bg-glass)'
                   }}
                 >
                   {st.status}

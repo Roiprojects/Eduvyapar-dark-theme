@@ -16,6 +16,9 @@ import Chapter08Future from './components/chapters/Chapter08Future';
 import { CHAPTERS, STUDENTS } from './data/storyData';
 
 export default function App() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('aivrm-theme') || 'dark';
+  });
   const [activeChapter, setActiveChapter] = useState('00');
   const [activeCountry, setActiveCountry] = useState('india');
   const [selectedStudent, setSelectedStudent] = useState(STUDENTS[0]);
@@ -27,6 +30,16 @@ export default function App() {
 
   const audioCtxRef = useRef(null);
   const oscRef = useRef([]);
+
+  // Sync theme with html root attribute and local storage
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('aivrm-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   // Mouse parallax tracking
   useEffect(() => {
@@ -55,7 +68,7 @@ export default function App() {
         audioCtxRef.current = ctx;
 
         // Luxurious ambient pad chords (D minor / F maj9 chord: D, A, C, E, F)
-        const freqs = [146.83, 220.00, 261.63, 329.63, 349.23];
+        const freqs = [146.83, 220.0, 261.63, 329.63, 349.23];
         const gainNode = ctx.createGain();
         gainNode.gain.setValueAtTime(0.06, ctx.currentTime);
 
@@ -146,6 +159,8 @@ export default function App() {
           e.preventDefault();
           scrollToChapter(target.id);
         }
+      } else if (e.key.toLowerCase() === 't') {
+        toggleTheme();
       }
     };
 
@@ -160,6 +175,7 @@ export default function App() {
         activeChapter={activeChapter}
         activeCountry={activeCountry}
         mousePos={mousePos}
+        theme={theme}
       />
 
       {/* Persistent Navigation (Desktop Left + Top Bar + Mobile Floating) */}
@@ -171,6 +187,8 @@ export default function App() {
         onToggleAudio={toggleAudio}
         isAuthenticated={isAuthenticated}
         userEmail={userEmail}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* Command Palette Modal */}
@@ -179,6 +197,8 @@ export default function App() {
         onClose={() => setIsCommandPaletteOpen(false)}
         onSelectChapter={scrollToChapter}
         onSelectStudent={(st) => setSelectedStudent(st)}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
 
       {/* 9 Continuous Chapters */}
@@ -250,9 +270,10 @@ export default function App() {
           <Chapter08Future
             onRestartStory={() => scrollToChapter('00')}
             onEnterDashboard={() => {
-              alert('Redirecting to EduVyapar sovereign institutional dashboard workspace...');
-              window.open('https://eduvyapar-scholar.vercel.app/dashboard', '_blank');
+              alert('Redirecting to AIVRM sovereign institutional workspace...');
             }}
+            theme={theme}
+            onToggleTheme={toggleTheme}
           />
         </div>
       </main>

@@ -1,7 +1,7 @@
 import React from 'react';
-import { ArrowRight, RotateCcw, Sparkles, ExternalLink, Compass } from 'lucide-react';
+import { ArrowRight, RotateCcw, Sparkles, Sun, Moon } from 'lucide-react';
 
-export default function Chapter08Future({ onRestartStory, onEnterDashboard }) {
+export default function Chapter08Future({ onRestartStory, onEnterDashboard, theme = 'dark', onToggleTheme }) {
   return (
     <section
       className="chapter-section"
@@ -22,8 +22,8 @@ export default function Chapter08Future({ onRestartStory, onEnterDashboard }) {
             gap: '8px',
             padding: '6px 16px',
             borderRadius: '9999px',
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
+            background: 'var(--bg-glass)',
+            border: '1px solid var(--border-subtle)',
             marginBottom: '32px'
           }}
         >
@@ -37,7 +37,7 @@ export default function Chapter08Future({ onRestartStory, onEnterDashboard }) {
               color: 'var(--accent-warm)'
             }}
           >
-            08 THE FUTURE • EDUVYAPAR
+            08 THE FUTURE • AIVRM
           </span>
         </div>
 
@@ -105,10 +105,34 @@ export default function Chapter08Future({ onRestartStory, onEnterDashboard }) {
           >
             <RotateCcw size={16} /> Re-experience Story
           </button>
+
+          <button
+            onClick={onToggleTheme}
+            className="btn-secondary"
+            style={{
+              padding: '14px 24px',
+              fontSize: '0.94rem',
+              borderRadius: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun size={16} color="var(--accent-warm)" /> Switch to Light Theme
+              </>
+            ) : (
+              <>
+                <Moon size={16} color="var(--accent-primary)" /> Switch to Dark Theme
+              </>
+            )}
+          </button>
         </div>
 
-        {/* Philosophy Badge */}
+        {/* Philosophy Badge with Clickable Mode Switch */}
         <div
+          onClick={onToggleTheme}
           style={{
             marginTop: '64px',
             display: 'inline-flex',
@@ -116,18 +140,21 @@ export default function Chapter08Future({ onRestartStory, onEnterDashboard }) {
             gap: '24px',
             padding: '12px 24px',
             borderRadius: '12px',
-            background: 'rgba(13, 17, 24, 0.7)',
+            background: 'var(--bg-glass)',
             border: '1px solid var(--border-subtle)',
-            fontSize: '0.8rem',
-            color: 'var(--text-tertiary)'
+            fontSize: '0.82rem',
+            color: 'var(--text-tertiary)',
+            cursor: 'pointer',
+            transition: 'all 0.25s ease'
           }}
+          title="Click to toggle theme"
         >
-          <span>
-            <strong style={{ color: 'var(--text-secondary)' }}>LIGHT MODE:</strong> "Shaping Brighter Futures."
+          <span style={{ color: theme === 'light' ? 'var(--accent-primary)' : 'inherit', fontWeight: theme === 'light' ? 700 : 400 }}>
+            <strong>LIGHT MODE:</strong> "Shaping Brighter Futures."
           </span>
-          <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>|</span>
-          <span>
-            <strong style={{ color: 'var(--accent-cyan)' }}>DARK MODE:</strong> "Education, Connected."
+          <span style={{ color: 'var(--border-subtle)' }}>|</span>
+          <span style={{ color: theme === 'dark' ? 'var(--accent-cyan)' : 'inherit', fontWeight: theme === 'dark' ? 700 : 400 }}>
+            <strong>DARK MODE:</strong> "Education, Connected."
           </span>
         </div>
       </div>

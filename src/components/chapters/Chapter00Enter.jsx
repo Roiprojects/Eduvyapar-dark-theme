@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { ArrowRight, Lock, Mail, Eye, EyeOff, CheckCircle } from 'lucide-react';
 
 export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNextChapter }) {
-  const [email, setEmail] = useState('admin@eduvyapar.edu');
-  const [password, setPassword] = useState('EduConnected2026!');
+  const [email, setEmail] = useState('admin@aivrm.edu');
+  const [password, setPassword] = useState('AIVRMConnected2026!');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,8 +47,8 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
               gap: '8px',
               padding: '6px 14px',
               borderRadius: '9999px',
-              background: 'rgba(255, 255, 255, 0.04)',
-              border: '1px solid rgba(255, 255, 255, 0.08)',
+              background: 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)',
               marginBottom: '28px'
             }}
           >
@@ -69,7 +69,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
                 color: 'var(--text-secondary)'
               }}
             >
-              A Global Education Ecosystem
+              A Global Education Ecosystem • AIVRM
             </span>
           </div>
 
@@ -84,7 +84,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
             }}
           >
             Education,<br />
-            <span style={{ fontStyle: 'italic', color: '#ffffff' }}>Connected.</span>
+            <span style={{ fontStyle: 'italic' }}>Connected.</span>
           </h1>
 
           <p
@@ -118,7 +118,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
               overflow: 'hidden'
             }}
           >
-            {/* Subtle top edge specular highlight */}
+            {/* Specular edge highlight */}
             <div
               style={{
                 position: 'absolute',
@@ -126,7 +126,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
                 left: '10%',
                 right: '10%',
                 height: '1px',
-                background: 'linear-gradient(90deg, transparent, rgba(108, 231, 255, 0.4), transparent)'
+                background: 'linear-gradient(90deg, transparent, var(--border-glow), transparent)'
               }}
             />
 
@@ -143,7 +143,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
                 Welcome back.
               </h2>
               <p style={{ fontSize: '0.88rem', color: 'var(--text-secondary)' }}>
-                Sign in to your intelligent workspace
+                Sign in to your AIVRM intelligent workspace
               </p>
             </div>
 
@@ -162,7 +162,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
                   Authenticated Successfully
                 </div>
                 <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                  Entering EduVyapar Global Ecosystem...
+                  Entering AIVRM Global Ecosystem...
                 </p>
               </div>
             ) : (
@@ -198,7 +198,7 @@ export default function Chapter00Enter({ onAuthenticate, isAuthenticated, onNext
                       onChange={(e) => setEmail(e.target.value)}
                       className="precision-input"
                       style={{ paddingLeft: '40px' }}
-                      placeholder="admin@eduvyapar.edu"
+                      placeholder="admin@aivrm.edu"
                     />
                   </div>
                 </div>

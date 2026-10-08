@@ -1,6 +1,6 @@
 import React from 'react';
 import { CHAPTERS } from '../data/storyData';
-import { Search, Volume2, VolumeX, ShieldCheck, Sparkles } from 'lucide-react';
+import { Search, Volume2, VolumeX, ShieldCheck, Sparkles, Sun, Moon } from 'lucide-react';
 
 export default function Navigation({
   activeChapter,
@@ -9,7 +9,9 @@ export default function Navigation({
   audioEnabled,
   onToggleAudio,
   isAuthenticated,
-  userEmail
+  userEmail,
+  theme = 'dark',
+  onToggleTheme
 }) {
   return (
     <>
@@ -26,9 +28,9 @@ export default function Navigation({
           justifyContent: 'space-between',
           padding: '0 32px',
           zIndex: 50,
-          background: 'linear-gradient(to bottom, rgba(7, 9, 13, 0.95), rgba(7, 9, 13, 0.4), transparent)',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.05)'
+          background: 'var(--header-bg)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border-subtle)'
         }}
       >
         {/* Brand / Logo */}
@@ -38,7 +40,7 @@ export default function Navigation({
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #685cff, #4c8dff)',
+              background: 'linear-gradient(135deg, var(--accent-primary), var(--accent-secondary))',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -52,13 +54,13 @@ export default function Navigation({
               <span
                 style={{
                   fontFamily: 'var(--font-display)',
-                  fontWeight: 700,
-                  fontSize: '1.05rem',
-                  letterSpacing: '-0.02em',
+                  fontWeight: 800,
+                  fontSize: '1.15rem',
+                  letterSpacing: '0.04em',
                   color: 'var(--text-primary)'
                 }}
               >
-                EduVyapar
+                AIVRM
               </span>
               <span
                 style={{
@@ -66,13 +68,14 @@ export default function Navigation({
                   letterSpacing: '0.12em',
                   textTransform: 'uppercase',
                   color: 'var(--accent-cyan)',
-                  padding: '1px 6px',
+                  padding: '2px 8px',
                   borderRadius: '4px',
-                  background: 'rgba(108, 231, 255, 0.1)',
-                  border: '1px solid rgba(108, 231, 255, 0.2)'
+                  background: theme === 'dark' ? 'rgba(108, 231, 255, 0.1)' : 'rgba(2, 132, 199, 0.1)',
+                  border: '1px solid var(--border-subtle)',
+                  fontWeight: 600
                 }}
               >
-                Dark Story Mode
+                {theme === 'dark' ? 'Dark Story Mode' : 'Light Mode'}
               </span>
             </div>
           </div>
@@ -85,10 +88,10 @@ export default function Navigation({
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            background: 'rgba(255, 255, 255, 0.04)',
+            background: 'var(--bg-glass)',
             padding: '6px 16px',
             borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.06)'
+            border: '1px solid var(--border-subtle)'
           }}
         >
           <span
@@ -96,12 +99,13 @@ export default function Navigation({
               fontFamily: 'monospace',
               fontSize: '0.75rem',
               color: 'var(--accent-primary)',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              fontWeight: 600
             }}
           >
             CHAPTER {activeChapter}
           </span>
-          <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>•</span>
+          <span style={{ color: 'var(--text-tertiary)' }}>•</span>
           <span
             style={{
               fontSize: '0.82rem',
@@ -114,12 +118,44 @@ export default function Navigation({
         </div>
 
         {/* Right Action Controls */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {/* Theme Toggle Button (Light/Dark Mode) */}
+          <button
+            onClick={onToggleTheme}
+            style={{
+              background: theme === 'dark' ? 'rgba(255, 255, 255, 0.08)' : 'rgba(15, 23, 42, 0.06)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '20px',
+              padding: '6px 12px',
+              color: 'var(--text-primary)',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '0.8rem',
+              fontWeight: 500,
+              transition: 'all 0.25s ease'
+            }}
+            title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+          >
+            {theme === 'dark' ? (
+              <>
+                <Sun size={15} color="var(--accent-warm)" />
+                <span className="hide-mobile">Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon size={15} color="var(--accent-primary)" />
+                <span className="hide-mobile">Dark Mode</span>
+              </>
+            )}
+          </button>
+
           {/* Command Palette Trigger */}
           <button
             onClick={onOpenCommandPalette}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'var(--bg-glass)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '6px 12px',
@@ -141,7 +177,7 @@ export default function Navigation({
           <button
             onClick={onToggleAudio}
             style={{
-              background: 'rgba(255, 255, 255, 0.05)',
+              background: 'var(--bg-glass)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '8px',
               padding: '6px 10px',
@@ -174,7 +210,7 @@ export default function Navigation({
               }}
             >
               <ShieldCheck size={13} />
-              <span>{userEmail ? userEmail.split('@')[0] : 'Workspace Active'}</span>
+              <span>{userEmail ? userEmail.split('@')[0] : 'AIVRM Active'}</span>
             </div>
           ) : (
             <button
@@ -226,7 +262,7 @@ export default function Navigation({
                   width: isActive ? '20px' : '6px',
                   height: '2px',
                   borderRadius: '1px',
-                  background: isActive ? 'var(--accent-cyan)' : 'rgba(255, 255, 255, 0.25)',
+                  background: isActive ? 'var(--accent-cyan)' : 'var(--text-tertiary)',
                   boxShadow: isActive ? '0 0 10px rgba(108, 231, 255, 0.8)' : 'none',
                   transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                 }}
@@ -239,7 +275,7 @@ export default function Navigation({
                   fontFamily: 'var(--font-sans)',
                   fontWeight: isActive ? 600 : 400,
                   color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  opacity: isActive ? 1 : 0.45,
+                  opacity: isActive ? 1 : 0.55,
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -259,9 +295,9 @@ export default function Navigation({
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 50,
-          background: 'rgba(13, 17, 24, 0.88)',
+          background: 'var(--bg-surface-elevated)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(255, 255, 255, 0.12)',
+          border: '1px solid var(--border-subtle)',
           borderRadius: '9999px',
           padding: '6px 14px',
           display: 'flex',
@@ -270,6 +306,20 @@ export default function Navigation({
           boxShadow: 'var(--shadow-spatial)'
         }}
       >
+        <button
+          onClick={onToggleTheme}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-primary)',
+            cursor: 'pointer',
+            padding: '2px 4px',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          {theme === 'dark' ? <Sun size={14} color="var(--accent-warm)" /> : <Moon size={14} color="var(--accent-primary)" />}
+        </button>
         <span style={{ fontSize: '0.75rem', color: 'var(--accent-cyan)', fontWeight: 600 }}>
           {activeChapter}
         </span>
@@ -285,7 +335,7 @@ export default function Navigation({
                 width: '6px',
                 height: '6px',
                 borderRadius: '50%',
-                background: c.id === activeChapter ? 'var(--accent-cyan)' : 'rgba(255, 255, 255, 0.3)',
+                background: c.id === activeChapter ? 'var(--accent-cyan)' : 'var(--border-subtle)',
                 border: 'none',
                 cursor: 'pointer',
                 padding: 0
